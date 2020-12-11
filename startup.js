@@ -1,7 +1,6 @@
 const fs = require("fs");
 // const { getAllTemplates, getTemplateID, getTemplate, getStates, getAllDisplayNames } = require('./renderer.js');
 const render = require('./renderer.js')
-const logFileName = "renderer-" + Date.now() + "-log.txt";
 
 let template;
 let templateID;
@@ -61,7 +60,7 @@ async function setAllTemplatesDefaults() {
  * @param {string}   tid        template ID, set to templateID global variable by default
  */
 //function called at startup that sets all defaults of active machines
-function setDefaults(uid, active, stateUID, tid) {
+function setDefaults(uid, active, stateUID, tid) {  
     // render.setTemplate(tid)
     states[tid][uid] = {};
     //set concurrent true or false in states object
