@@ -65,7 +65,6 @@ function getInput(query) {
 function showAllStates(tid = templateID) {
     //set current template
     setTemplate(tid);
-    console.log('states ', states)
     let statesReturn = JSON.stringify(states[templateID], null, 2);
     console.log("All states \n", statesReturn);
     return {
