@@ -23,7 +23,7 @@ let template;
 
 //states and role
 let states = {};
-let role = {};
+let role = "";
 
 let allUsers = {};
 
@@ -541,3 +541,4 @@ exports.getAllUsers = () => allUsers;
 exports.getTemplateID = () => templateID;
 exports.getTemplate = () => template;
 exports.setTemplate = setTemplate;
+exports.doAction = doAction;

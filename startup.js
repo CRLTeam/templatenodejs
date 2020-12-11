@@ -107,6 +107,8 @@ function setDefaults(uid, active, stateUID, tid) {
         //     allDisplayNames[tid][name] = statemachineUID;
         // }
 
+        // console.log('TEMPLATE ', template)
+        // console.log('UID ', uid)
         //root machine is special case because it has no parent machine
         if (uid == 0) {
             //if the state is the default state of the machine, or if the machine is concurrent, the state will be active

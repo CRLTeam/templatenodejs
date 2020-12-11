@@ -7,14 +7,14 @@ let template;
 let templateID;
 let states;
 let allDisplayNames;
-let allTemplates;
+let role;
 
 function setVariables() {
     templateID = render.getTemplateID();
     template = render.getTemplate();
     states = render.getStates();
     allDisplayNames = render.getAllDisplayNames();
-    allTemplates = render.getAllTemplates();
+    role = render.getRole();
 }
 
 function updateVariables() {
@@ -429,7 +429,7 @@ async function doBroadcast(broadcast) {
     setVariables();
     try {
         //call action from other machine
-        let res = await doAction(broadcast.action, broadcast.machine, "broadcast", role);
+        let res = await render.doAction(broadcast.action, broadcast.machine, "broadcast", role);
 
         updateVariables();
         return {
@@ -438,8 +438,6 @@ async function doBroadcast(broadcast) {
             data: res
         };
     } catch (e) {
-        console.log(e);
-
         return {
             status: "fail",
             type: "broadcast",
