@@ -97,15 +97,6 @@ async function exitNestedMachines(machineName) {
         }
         //exit machine
         states[templateID][machineName].currentState = null;
-//         fs.appendFile(
-//             logFileName,
-//             `
-// -----
-// Nested state exited: ${machineName}`,
-//             function (err) {
-//                 if (err) throw err;
-//             }
-//         );
         return;
         // current state is composite
     } else {
@@ -147,21 +138,14 @@ let exitRes = [];
  * TODO: add ability to erase history
  */
 async function exit(from, stateUid, common) {
-    console.log("from ", from);
     let j = from.length - 1;
-    console.log("j, common", j, common);
-    console.log("stateuid", stateUid);
     exitRes = [];
 
     let machineName = from[j];
     let state = template[machineName].states[stateUid];
-    console.log("from length ", from.length - 1);
-    console.log("comp? ", state.composite);
     //from first machine call function to keep checking for composite machines and exiting them first from the bottom of the hierarchy
     if (state.composite) {
-        console.log("STATE ", state);
         let nextMachine = state.machine;
-        console.log("next machine exit ", nextMachine);
         await exitNestedMachines(nextMachine);
     // check if machine has concurrent states
     } else if(template[machineName].concurrent){
@@ -179,10 +163,8 @@ async function exit(from, stateUid, common) {
     //go up the hierarchy from the "from" state and trigger each exit action
     while (j > common) {
         machineName = from[j];
-        //console.log('machinename ', machineName)
         let currState = template[machineName].default;
         state = template[machineName].states[currState];
-        //console.log('state ', state)
 
         //if exit actions exist, call each exit action in order
         if (state.exit.length != 0) {
@@ -202,16 +184,6 @@ async function exit(from, stateUid, common) {
         //exit machine
         console.log(`exiting ${machineName}....`);
         states[templateID][machineName].currentState = null;
-        console.log(states[templateID][machineName].currentState);
-//         fs.appendFile(
-//             logFileName,
-//             `
-// -----
-// State exited: ${machineName}`,
-//             function (err) {
-//                 if (err) throw err;
-//             }
-//         );
 
         j--;
     }
@@ -274,16 +246,6 @@ async function enterNestedMachines(machineName, concurr = false) {
         }
     }
 
-//     fs.appendFile(
-//         logFileName,
-//         `
-// -----
-// Nested state entered: ${machineName}`,
-//         function (err) {
-//             if (err) throw err;
-//         }
-//     );
-
     //have to check if there are any nested composite machines, if there are, keep digging
     //down and setting their default states until you hit hit the end of the chain
     let nextState = machine.currentState;
@@ -314,8 +276,7 @@ async function enter(to, stateUid, common) {
             if (states[templateID][machineName].history == "") {
                 console.log(`entering ${machineName}....`);
                 states[templateID][machineName].currentState = stateUid;
-                console.log(states[templateID][machineName].currentState);
-                //if history was already stored, enter state stored in history, erase history
+            //if history was already stored, enter state stored in history, erase history
             } else {
                 states[templateID][machineName].currentState = states[templateID][machineName].history;
                 states[templateID][machineName].history = "";
@@ -340,15 +301,7 @@ async function enter(to, stateUid, common) {
             nextMachine = state.machine;
             await enterNestedMachines(nextMachine);
         }
-//         fs.appendFile(
-//             logFileName,
-//             `
-// -----
-// State entered: ${machineName}`,
-//             function (err) {
-//                 if (err) throw err;
-//             }
-//         );
+
         j++;
     }
     if (enterRes.length == 0) {
@@ -365,22 +318,10 @@ async function enter(to, stateUid, common) {
  */
 async function doTransition(machineName, transitionName) {
     setVariables();
-//     fs.appendFile(
-//         logFileName,
-//         `
-// -----
-// Transition started.
-// Machine: ${machineName}
-// Transition name: ${transitionName}`,
-//         function (err) {
-//             if (err) throw err;
-//         }
-//     );
+
     let machine = template[machineName];
     let currState = states[templateID][machineName].currentState;
-    console.log('curr state  ', currState)
     let transition = machine.states[currState].transitions[transitionName];
-    console.log('transition ', transition)
 
     //set to and from machine names
     let from = transition["from"];
@@ -395,17 +336,7 @@ async function doTransition(machineName, transitionName) {
     let exitResponse = await exit(fromArr, from.uid, common);
     //call enter function to perform enter actions
     let enterResponse = await enter(toArr, to.uid, common);
-//     fs.appendFile(
-//         logFileName,
-//         `
-// -----
-// Transition COMPLETE.
-// Transitioned from: ${transition["from"]}
-// Transitioned to: ${transition["to"]}`,
-//         function (err) {
-//             if (err) throw err;
-//         }
-//     );
+
     updateVariables();
     return {
         status: "success",

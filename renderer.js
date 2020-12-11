@@ -38,7 +38,6 @@ let allDisplayNames = {};
  * @param {string} tid   template ID
  */
 function setTemplate(tid) {
-    console.log('GETTING CALLEDDDD ', tid)
     //uses inputted template id and sets it to the global variable templateID
     templateID = tid;
     //sets active template object to the one associated with the templateID
@@ -119,7 +118,6 @@ async function doEvents(events, machineName, data) {
     let x = 0;
     //loop through each event, check type, and execute it
     for (e of events) {
-        console.log('EVENT ', e)
         if (e.type == "transition") {
             let transition = await doTransition(machineName, e.do);
             responseArr.push(transition);
@@ -128,8 +126,6 @@ async function doEvents(events, machineName, data) {
             responseArr.push(broadcast);
         } else if (e.type == "function") {
             //send data when calling function
-            console.log('EVENT DO ', e.do)
-            console.log('DATA ', data)
             let func = await doFunction(e.do, data);
             responseArr.push(func);
         } else if (e.type == "action") {
@@ -198,11 +194,9 @@ async function doAction(actionName, machineName, type, role, tid = templateID, d
 
         //find first action that has condition that is met and execute it's events
         for (const event of events) {
-            console.log('event', event)
             //if condition is true boolean, do event
             if (event.condition === true) {
                 response = await doEvents(event.events, machineName, data);
-                //console.log('NEW STATES ', states)
                 resolve(response);
                 return;
             } else {
@@ -211,7 +205,7 @@ async function doAction(actionName, machineName, type, role, tid = templateID, d
                     let funcArgs = {func: event.condition[idx].func,
                                     args: event.condition[idx].args}
                     let checkCon = await doFunction(funcArgs);
-                    console.log('check CONDITION??!@?!?@!?$!?$ ', checkCon)
+                    //console.log('check CONDITION??!@?!?@!?$!?$ ', checkCon)
                     if (checkCon) {
                         response = await doEvents(event.events, machineName, data);
                         resolve(response);
@@ -306,8 +300,6 @@ function getDisplayData(machineName, tid, state, userRole = role) {
     templateID = tid;
     template = allTemplates[templateID];
 
-    // console.log('template', template)
-    // console.log('machine name ', machineName)
     let displayState = template.machines[machineName].display[state][userRole];
     if(displayState == ""){
         return {
@@ -358,7 +350,6 @@ async function start() {
         if(allTemplates[templateID]){
             template = allTemplates[templateID];
         }
-        console.log('all temps', allTemplates)
     } while (templateID == -1);
     //ask user to set their role
     let roles = setRoles(templateID);
