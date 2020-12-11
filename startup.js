@@ -103,9 +103,6 @@ function setDefaults(uid, active, stateUID, tid) {
         //set display name for every state
         let name = template[uid].states[stateUID].displayName;
         allDisplayNames[tid][name] = stateUID;
-        // if(stateMachineUID != null){
-        //     allDisplayNames[tid][name] = statemachineUID;
-        // }
 
         //root machine is special case because it has no parent machine
         if (uid == 0) {

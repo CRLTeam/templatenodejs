@@ -1373,23 +1373,6 @@ const newTemp =   {
                                         ]
                                     }
                                 ]
-                                },
-                                "action-5h12i8": {
-                                    "displayName": "yep",
-                                    "action": [
-                                        {
-                                            "condition": true,
-                                            "events": [
-                                                {
-                                                "type": "function",
-                                                "do": {
-                                                    "func": "setData",
-                                                    "args": "wow,ok"
-                                                }
-                                                }
-                                            ]
-                                        }
-                                    ]
                                 }
                             }
                         }
@@ -1397,8 +1380,8 @@ const newTemp =   {
                 },
                 "state-c5df3d": {
                     "displayName": "second",
-                    "machine": null,
-                    "composite": false,
+                    "machine": "machine-1",
+                    "composite": true,
                     "entry": [],
                     "exit": [],
                     "transitions": {
@@ -1437,6 +1420,136 @@ const newTemp =   {
                                                 {
                                                     "type": "transition",
                                                     "do": "90e585"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                "action-5h12i8": {
+                                    "displayName": "broadcast",
+                                    "action": [
+                                        {
+                                            "condition": true,
+                                            "events": [
+                                                {
+                                                "type": "broadcast",
+                                                "do": {
+                                                    "machine": "machine-1", 
+                                                    "action": "action-7a9cf8"
+                                                }
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+            },
+        },
+        "machine-1": {
+            "displayName": "/first",
+            "parent": "0",
+            "default": "state-dd134h2",
+            "concurrent": false,
+            "history": false,
+            "transitions": {},
+            "actions": {},
+            "states": {
+                "state-dd134h2": {
+                    "displayName": "basic",
+                    "machine": null,
+                    "composite": false,
+                    "entry": [],
+                    "exit": [],
+                    "transitions": {
+                        "90e585": {
+                            "displayName": "switch",
+                            "from": {
+                                "machine": "machine-1",
+                                "uid": "state-dd134h2"
+                            },
+                            "to": {
+                                "machine": "machine-1",
+                                "uid": "state-j1452d3"
+                            }
+                        }
+                    },
+                    "role": {
+                        "default-role":{
+                            "display": {
+                                "english": {
+                                    "default-role": {
+                                        "description": "title",
+                                        "displayData": [
+                                            {title: 1},
+                                            {button: 1}
+                                        ]
+                                    }
+                                }
+                            },
+                            "actions": {
+                                "action-7a9cf8": {
+                                "displayName": "switch",
+                                "action": [
+                                    {
+                                        "condition": true,
+                                        "events": [
+                                            {
+                                                "type": "transition",
+                                                "do": "90e585"
+                                            }
+                                        ]
+                                    }
+                                ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "state-j1452d3": {
+                    "displayName": "second",
+                    "machine": null,
+                    "composite": false,
+                    "entry": [],
+                    "exit": [],
+                    "transitions": {
+                        "84ghd12": {
+                            "displayName": "switch",
+                            "from": {
+                                "machine": "machine-1",
+                                "uid": "state-j1452d3"
+                            },
+                            "to": {
+                                "machine": "machine-1",
+                                "uid": "state-dd134h2"
+                            }
+                        }
+                    },
+                    "role": {
+                        "default-role":{
+                            "display": {
+                                "english": {
+                                    "default-role": {
+                                        "description": "title",
+                                        "displayData": [
+                                            {title: 1},
+                                            {button: 1}
+                                        ]
+                                    }
+                                }
+                            },
+                            "actions": {
+                                "action-7a9cf8": {
+                                    "displayName": "switch",
+                                    "action": [
+                                        {
+                                            "condition": true,
+                                            "events": [
+                                                {
+                                                    "type": "transition",
+                                                    "do": "84ghd12"
                                                 }
                                             ]
                                         }
