@@ -50,15 +50,6 @@ async function setAllTemplatesDefaults() {
         allDisplayNames[tid] = {};
         //call setDefaults for the template
         await setDefaults(0, true, null, tid);
-//         fs.appendFile(
-//             logFileName,
-//             `
-// -----
-// Default states set for template ${tid}.`,
-//             function (err) {
-//                 if (err) throw err;
-//             }
-//         );
     }
 }
 
