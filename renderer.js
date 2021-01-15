@@ -512,6 +512,53 @@ server.use(
     })
 );
 
+// Express routes
+const router = express.Router();
+
+// Create instance
+server.use(
+    "/",
+    router.get("/createInstance/:tid/:rid", async (req, res) => {
+        console.log("Called createInstance with template=", req.params.tid, " role=", req.params.rid);
+        console.log("States=", states)
+        console.log("Display=", displays["state_f156bc"].roles["default-role"])
+        states[req.params.tid]["0"].currentState = "state_f156bc";
+        return res.json({currentState: "state_f156bc", displayObject: displays["state_f156bc"].roles["default-role"]});
+    })
+);
+
+// Action call
+server.use(
+    "/",
+    router.get("/callAction/:tid/:sid/:aid/:rid", async (req, res) => {
+        let currState = states[templateID][machineName].curreentState;
+        console.log("Called callAction with template=", req.params.tid, " state=", req.params.sid, " action=", req.params.aid, " role=", req.params.rid);
+        console.log("States=", states)
+        console.log("Display=", displays[currState].roles[req.params.id])
+        try {
+            console.log("doAction call");
+            await doAction(req.params.aid, "0", "user", req.params.rid, req.params.tid);
+            console.log("doAction called new state=", states[req.params.tid]["0"].currentState);
+            return res.json({currentState: states[req.params.tid]["0"].currentState, displayObject: displays[states[req.params.tid]["0"].currentState].roles[req.params.rid]});
+        } catch (e) {
+            return res.status(400).json({
+                message: e,
+                states: states,
+            });
+        }
+    })
+);
+
+// User status
+server.use(
+    "/",
+    router.get("currentUserStatus/:tid/:rid)", async (req , res) => {
+        console.log("Called callAction with template=", req.params.tid, " role=", req.params.rid);
+        let currState = states[templateID][machineName].curreentState;
+        return res.json({currentState: currState, displayObject: displays[currState].roles[req.params.rid]});
+    })
+);
+
 // Run server
 const port = process.env.PORT || 5000;
 server.listen(port);
