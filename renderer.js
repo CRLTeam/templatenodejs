@@ -334,6 +334,42 @@ function getDisplayData(machineName, tid, state, userRole = role) {
     };
 }
 
+function createInstance(tid, rid) {
+    //get json file
+    let fileName = 'instances.JSON';
+    let instances = JSON.parse(fs.readFileSync(fileName).toString());
+    
+    //create instance ID
+    let instanceID;
+    do{
+        instanceID = Math.floor(Math.random()*999); 
+    } while(instances[instanceID])
+
+    // create instance 
+    let newInstance = {
+            templateID: tid,
+            role: rid,
+            context: tid
+    };
+        
+    //add new instance to all instances
+    instances[instanceID] = newInstance;
+    
+    //write to file
+    fs.writeFile('instances.JSON', JSON.stringify(instances, null, 2), function writeJSON(err) {
+        if (err) return console.log(err);
+    });
+} 
+
+function getInstance(instanceID) {
+    //get json file
+    let fileName = 'instances.JSON';
+    let instances = JSON.parse(fs.readFileSync(fileName).toString());
+    console.log(`INSTANCE ${instanceID}`, instances[instanceID]);
+
+    return instances;
+}
+
 /**
  * Set up roles array and set user role. Set default states of active machines.
  */
@@ -513,7 +549,7 @@ server.use(
 );
 
 // Express routes
-const router = express.Router();
+// const router = express.Router();
 
 // Create instance
 server.use(
@@ -523,6 +559,7 @@ server.use(
         console.log("States=", states)
         console.log("Display=", displays["state_f156bc"].roles["default-role"])
         states[req.params.tid]["0"].currentState = "state_f156bc";
+        createInstance(req.params.tid, req.params.rid);
         return res.json({currentState: "state_f156bc", displayObject: displays["state_f156bc"].roles["default-role"]});
     })
 );
@@ -552,9 +589,9 @@ server.use(
 // User status
 server.use(
     "/",
-    router.get("currentUserStatus/:tid/:rid)", async (req , res) => {
+    router.get("/currentUserStatus/:tid/:rid", async (req , res) => {
         console.log("Called callAction with template=", req.params.tid, " role=", req.params.rid);
-        let currState = states[templateID][machineName].curreentState;
+        let currState = states[templateID][machineName].currentState;
         return res.json({currentState: currState, displayObject: displays[currState].roles[req.params.rid]});
     })
 );
