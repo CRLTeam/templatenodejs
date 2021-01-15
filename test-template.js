@@ -1349,15 +1349,11 @@ const newTemp =   {
                     "role": {
                         "default-role":{
                             "display": {
-                                "english": {
-                                    "default-role": {
-                                        "description": "title",
-                                        "displayData": [
-                                            {title: 1},
-                                            {button: 1}
-                                        ]
-                                    }
-                                }
+                                "description": "title",
+                                "displayData": [
+                                    {title: 1},
+                                    {button: 1}
+                                ]
                             },
                             "actions": {
                                 "action-7a9cf8": {
@@ -1400,15 +1396,11 @@ const newTemp =   {
                     "role": {
                         "default-role":{
                             "display": {
-                                "english": {
-                                    "default-role": {
-                                        "description": "title",
-                                        "displayData": [
-                                            {title: 1},
-                                            {button: 1}
-                                        ]
-                                    }
-                                }
+                                "description": "title",
+                                "displayData": [
+                                    {title: 1},
+                                    {button: 1}
+                                ]
                             },
                             "actions": {
                                 "action-7a9cf8": {
@@ -1479,15 +1471,11 @@ const newTemp =   {
                     "role": {
                         "default-role":{
                             "display": {
-                                "english": {
-                                    "default-role": {
-                                        "description": "title",
-                                        "displayData": [
-                                            {title: 1},
-                                            {button: 1}
-                                        ]
-                                    }
-                                }
+                                "description": "title",
+                                "displayData": [
+                                    {title: 1},
+                                    {button: 1}
+                                ]
                             },
                             "actions": {
                                 "action-7a9cf8": {
@@ -1530,15 +1518,11 @@ const newTemp =   {
                     "role": {
                         "default-role":{
                             "display": {
-                                "english": {
-                                    "default-role": {
-                                        "description": "title",
-                                        "displayData": [
-                                            {title: 1},
-                                            {button: 1}
-                                        ]
-                                    }
-                                }
+                                "description": "title",
+                                "displayData": [
+                                    {title: 1},
+                                    {button: 1}
+                                ]
                             },
                             "actions": {
                                 "action-7a9cf8": {

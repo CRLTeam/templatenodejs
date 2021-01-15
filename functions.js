@@ -9,6 +9,18 @@ let states;
 let allDisplayNames;
 let allTemplates;
 
+const axios = require('axios');
+const url = 'http://localhost:3001';
+
+// axios({
+//     method: 'post',
+//     url: `${url}/api/template`,
+//     data: {
+//       _id: tid,
+//       data: "First entry"
+//     }
+// })
+
 function setVariables() {
     templateID = render.getTemplateID();
     template = render.getTemplate();
