@@ -385,11 +385,12 @@ async function start() {
         if(allTemplates[templateID]){
             template = allTemplates[templateID];
         }
+        console.log('ALL TEMPS', allTemplates)
     } while (templateID == -1);
     //ask user to set their role
     let roles = setRoles(templateID);
     let userRole;
-
+    
     while (true) {
         userRole = await getInput(`Please select a role [${roles}]: `);
         if (!roles.includes(userRole)) {
@@ -426,6 +427,11 @@ async function main() {
     //set up all needed global variables and arrays
     await start();
 
+    //
+    let currentState = states['newTemp'][0].currentState;
+    let displayData = allTemplates['newTemp'].machines[0].states[currentState].role['default-role'].display;
+    console.log('DISPLAYYY ', displayData)
+    //
     let input;
 
     cli: while (true) {
@@ -558,9 +564,11 @@ server.use(
         console.log("Called createInstance with template=", req.params.tid, " role=", req.params.rid);
         console.log("States=", states)
         console.log("Display=", displays["state_f156bc"].roles["default-role"])
+        let currentState = states[req.params.tid][0].currentState;
+        let displayData = allTemplates[req.params.tid].machines[0].states[currentState].role[rid].display;
         states[req.params.tid]["0"].currentState = "state_f156bc";
         createInstance(req.params.tid, req.params.rid);
-        return res.json({currentState: "state_f156bc", displayObject: displays["state_f156bc"].roles["default-role"]});
+        return res.json({currentState: currentState, displayObject: displays["state_f156bc"].roles["default-role"]});
     })
 );
 
