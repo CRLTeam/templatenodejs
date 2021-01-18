@@ -369,7 +369,6 @@ function getInstance(instanceID) {
     let fileName = 'instances.JSON';
     let instances = JSON.parse(fs.readFileSync(fileName).toString());
     let instance = instances[instanceID];
-    console.log(`INSTANCE ${instanceID}`, instances[instanceID]);
 
     return instance;
 }
@@ -563,13 +562,18 @@ server.use(
 server.use(
     "/",
     router.get("/createInstance/:tid/:rid", async (req, res) => {
+        //template id
         let tid = req.params.tid;
+        //role id
         let rid = req.params.rid;
         console.log("\n\nCalled createInstance with template=", tid, " role=", rid);
         console.log("States=", states[tid])
+        //create instance and store instance id
         let instanceID = createInstance(tid, rid, states[tid]);
         
+        //get current state
         let currentState = states[tid][0].currentState;
+        //get display data for current state
         let displayData = allTemplates[tid].machines[0].states[currentState].role[rid].display;
         console.log("Display=", displayData)
         return res.json({currentState: currentState, displayObject: displayData, instanceID: instanceID});
@@ -579,7 +583,7 @@ server.use(
 // Action call
 server.use(
     "/",
-    router.get("/callAction/iid/:mid/:aid", async (req, res) => {
+    router.get("/callAction/:iid/:mid/:aid", async (req, res) => {
         //instance id
         let instanceID = req.params.iid;
         //machine id
@@ -587,14 +591,16 @@ server.use(
         //action id
         let aid = req.params.aid;
         
+        //get instance
         let instance = getInstance(instanceID);
-
         //role id
-        let rid = req.params.rid;
+        let rid = instance.role;
         //template id
-        let tid = req.params.tid;
+        let tid = instance.templateID;
 
-        console.log(`Called callAction with:
+        console.log(`
+        
+Called callAction with:
 role=${rid}
 template=${tid}
 machine=${mid}
