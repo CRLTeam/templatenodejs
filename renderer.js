@@ -381,6 +381,11 @@ function updateInstance(instanceID, data) {
     //replace old instance data with new instance data
     instances[instanceID] = data;
 
+    //write to file
+    fs.writeFile('instances.JSON', JSON.stringify(instances, null, 2), function writeJSON(err) {
+        if (err) return console.log(err);
+    });
+
     return true;
 }
 
@@ -576,7 +581,15 @@ server.use(
         //role id
         let rid = req.params.rid;
         console.log("\n\nCalled createInstance with template=", tid, " role=", rid);
-        console.log("States=", states[tid])
+        console.log(`
+        
+Called createInstance with:
+template=${tid}
+role=${rid}
+
+States= ${states[tid]}
+
+`);
         //create instance and store instance id
         let instanceID = createInstance(tid, rid, states[tid]);
         
@@ -606,6 +619,10 @@ server.use(
         let rid = instance.role;
         //template id
         let tid = instance.templateID;
+        //instance states
+        let instanceStates = instance.states;
+        //set current states object to instance's states object
+        states[tid] = instanceStates;
 
         console.log(`
         
@@ -614,23 +631,31 @@ role=${rid}
 template=${tid}
 machine=${mid}
 action=${aid}
+
+States= ${JSON.stringify(instanceStates)}
+
 `);
-        console.log("States=", states[tid])
 
         try {
-            console.log("doAction call");
             let currentState = states[tid][mid].currentState;
             let displayData = allTemplates[tid].machines[mid].states[currentState].role[rid].display;
             console.log('current state before call: ', currentState)
             await doAction(aid, mid, "user", rid, tid);
             currentState = states[tid][mid].currentState;
             console.log('current state after call: ', currentState)
-            console.log("Display=", displayData)
-            return res.json({currentState: currentState, displayObject: displayData});
+            //console.log("Display=", displayData)
+            //replace old instance states with new states
+            instance.states = states[tid];
+            let updatedInstance = updateInstance(instanceID, instance)
+            if(updatedInstance){
+                return res.json({status: "success", currentState: currentState, displayObject: displayData});
+            }else {
+                return res.json({status: "fail"})
+            }
         } catch (e) {
             return res.status(400).json({
                 message: e,
-                states: states,
+                states: instanceStates,
             });
         }
     })
