@@ -577,16 +577,36 @@ server.use(
 // Action call
 server.use(
     "/",
-    router.get("/callAction/:tid/:sid/:aid/:rid", async (req, res) => {
-        let currState = states[templateID][machineName].curreentState;
-        console.log("Called callAction with template=", req.params.tid, " state=", req.params.sid, " action=", req.params.aid, " role=", req.params.rid);
-        console.log("States=", states)
-        console.log("Display=", displays[currState].roles[req.params.id])
+    router.get("/callAction/:rid/:tid/:mid/:aid", async (req, res) => {
+        //role id
+        let rid = req.params.rid;
+        //template id
+        let tid = req.params.tid;
+        //machine id
+        let mid = req.params.mid;
+        //state id
+        //let sid = req.params.sid;
+        //action id
+        let aid = req.params.aid;
+
+        console.log(`Called callAction with:
+role=${rid}
+template=${tid}
+machine=${mid}
+action=${aid}
+`);
+        console.log("States=", states[tid])
+
         try {
             console.log("doAction call");
-            await doAction(req.params.aid, "0", "user", req.params.rid, req.params.tid);
-            console.log("doAction called new state=", states[req.params.tid]["0"].currentState);
-            return res.json({currentState: states[req.params.tid]["0"].currentState, displayObject: displays[states[req.params.tid]["0"].currentState].roles[req.params.rid]});
+            let currentState = states[tid][mid].currentState;
+            let displayData = allTemplates[tid].machines[mid].states[currentState].role[rid].display;
+            console.log('current state before call: ', currentState)
+            await doAction(aid, mid, "user", rid, tid);
+            currentState = states[tid][mid].currentState;
+            console.log('current state after call: ', currentState)
+            console.log("Display=", displayData)
+            return res.json({currentState: currentState, displayObject: displayData});
         } catch (e) {
             return res.status(400).json({
                 message: e,
