@@ -334,7 +334,7 @@ function getDisplayData(machineName, tid, state, userRole = role) {
     };
 }
 
-function createInstance(tid, rid) {
+function createInstance(tid, rid, states) {
     //get json file
     let fileName = 'instances.JSON';
     let instances = JSON.parse(fs.readFileSync(fileName).toString());
@@ -349,7 +349,8 @@ function createInstance(tid, rid) {
     let newInstance = {
             templateID: tid,
             role: rid,
-            context: tid
+            context: tid,
+            states: states
     };
         
     //add new instance to all instances
@@ -359,16 +360,21 @@ function createInstance(tid, rid) {
     fs.writeFile('instances.JSON', JSON.stringify(instances, null, 2), function writeJSON(err) {
         if (err) return console.log(err);
     });
+
+    return instanceID;
 } 
 
 function getInstance(instanceID) {
     //get json file
     let fileName = 'instances.JSON';
     let instances = JSON.parse(fs.readFileSync(fileName).toString());
+    let instance = instances[instanceID];
     console.log(`INSTANCE ${instanceID}`, instances[instanceID]);
 
-    return instances;
+    return instance;
 }
+
+
 
 /**
  * Set up roles array and set user role. Set default states of active machines.
@@ -385,7 +391,6 @@ async function start() {
         if(allTemplates[templateID]){
             template = allTemplates[templateID];
         }
-        console.log('ALL TEMPS', allTemplates)
     } while (templateID == -1);
     //ask user to set their role
     let roles = setRoles(templateID);
@@ -426,12 +431,6 @@ async function main() {
 
     //set up all needed global variables and arrays
     await start();
-
-    //
-    let currentState = states['newTemp'][0].currentState;
-    let displayData = allTemplates['newTemp'].machines[0].states[currentState].role['default-role'].display;
-    console.log('DISPLAYYY ', displayData)
-    //
     let input;
 
     cli: while (true) {
@@ -508,6 +507,8 @@ server.use(cors());
 // Express routes
 const router = express.Router();
 
+//UNUSED CALLS
+/** 
 server.use(
     "/",
     router.get("/show_all_states/:tid", async (req, res) => {
@@ -553,6 +554,7 @@ server.use(
         }
     })
 );
+**/
 
 // Express routes
 // const router = express.Router();
@@ -563,31 +565,34 @@ server.use(
     router.get("/createInstance/:tid/:rid", async (req, res) => {
         let tid = req.params.tid;
         let rid = req.params.rid;
-        console.log("Called createInstance with template=", tid, " role=", rid);
-        console.log("States=", states)
-        createInstance(tid, rid);
+        console.log("\n\nCalled createInstance with template=", tid, " role=", rid);
+        console.log("States=", states[tid])
+        let instanceID = createInstance(tid, rid, states[tid]);
         
         let currentState = states[tid][0].currentState;
         let displayData = allTemplates[tid].machines[0].states[currentState].role[rid].display;
         console.log("Display=", displayData)
-        return res.json({currentState: currentState, displayObject: displayData});
+        return res.json({currentState: currentState, displayObject: displayData, instanceID: instanceID});
     })
 );
 
 // Action call
 server.use(
     "/",
-    router.get("/callAction/:rid/:tid/:mid/:aid", async (req, res) => {
+    router.get("/callAction/iid/:mid/:aid", async (req, res) => {
+        //instance id
+        let instanceID = req.params.iid;
+        //machine id
+        let mid = req.params.mid;
+        //action id
+        let aid = req.params.aid;
+        
+        let instance = getInstance(instanceID);
+
         //role id
         let rid = req.params.rid;
         //template id
         let tid = req.params.tid;
-        //machine id
-        let mid = req.params.mid;
-        //state id
-        //let sid = req.params.sid;
-        //action id
-        let aid = req.params.aid;
 
         console.log(`Called callAction with:
 role=${rid}
