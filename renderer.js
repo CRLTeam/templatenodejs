@@ -557,10 +557,13 @@ server.use(
     router.get("/createInstance/:tid/:rid", async (req, res) => {
         console.log("Called createInstance with template=", req.params.tid, " role=", req.params.rid);
         console.log("States=", states)
-        console.log("Display=", displays["state_f156bc"].roles["default-role"])
+        // console.log("Display=", displays["state_f156bc"].roles["default-role"])
         states[req.params.tid]["0"].currentState = "state_f156bc";
         createInstance(req.params.tid, req.params.rid);
-        return res.json({currentState: "state_f156bc", displayObject: displays["state_f156bc"].roles["default-role"]});
+
+        let currentState = states[req.params.tid][0].currentState;
+        let displayData = allTemplates[req.params.tid].machines[0].states[currentState].role[rid].display;
+        return displayData;//res.json({currentState: "state_f156bc", displayObject: displays["state_f156bc"].roles["default-role"]});
     })
 );
 
