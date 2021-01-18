@@ -1398,8 +1398,8 @@ const newTemp =   {
                             "display": {
                                 "description": "title",
                                 "displayData": [
-                                    {title: 1},
-                                    {button: 1}
+                                    {title: 2},
+                                    {button: 2}
                                 ]
                             },
                             "actions": {
@@ -1473,8 +1473,8 @@ const newTemp =   {
                             "display": {
                                 "description": "title",
                                 "displayData": [
-                                    {title: 1},
-                                    {button: 1}
+                                    {title: 3},
+                                    {button: 3}
                                 ]
                             },
                             "actions": {
@@ -1520,8 +1520,8 @@ const newTemp =   {
                             "display": {
                                 "description": "title",
                                 "displayData": [
-                                    {title: 1},
-                                    {button: 1}
+                                    {title: 4},
+                                    {button: 4}
                                 ]
                             },
                             "actions": {

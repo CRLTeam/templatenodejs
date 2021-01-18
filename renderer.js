@@ -598,7 +598,8 @@ States= ${states[tid]}
         //get display data for current state
         let displayData = allTemplates[tid].machines[0].states[currentState].role[rid].display;
         console.log("Display=", displayData)
-        return res.json({currentState: currentState, displayObject: displayData, instanceID: instanceID});
+
+        return res.json({status: "success", currentState: currentState, displayObject: displayData, instanceID: instanceID});
     })
 );
 
@@ -664,10 +665,41 @@ States= ${JSON.stringify(instanceStates)}
 // User status
 server.use(
     "/",
-    router.get("/currentUserStatus/:tid/:rid", async (req , res) => {
-        console.log("Called callAction with template=", req.params.tid, " role=", req.params.rid);
-        let currState = states[templateID][machineName].currentState;
-        return res.json({currentState: currState, displayObject: displays[currState].roles[req.params.rid]});
+    router.get("/currentUserStatus/:iid/:mid", async (req , res) => {
+        //instance id
+        let instanceID = req.params.iid;
+        //machine id
+        let mid = req.params.mid;
+      
+        //get instance
+        let instance = getInstance(instanceID);
+        //role id
+        let rid = instance.role;
+        //template id
+        let tid = instance.templateID;
+        //instance states
+        let instanceStates = instance.states;
+        //set current states object to instance's states object
+        states[tid] = instanceStates;
+
+        console.log(`
+        
+Called currentUserStatus with:
+role=${rid}
+template=${tid}
+machine=${mid}
+
+States= ${JSON.stringify(instanceStates)}
+
+`);
+
+        //get current state
+        let currentState = instanceStates[mid].currentState;
+        //get display data for current state
+        let displayData = allTemplates[tid].machines[0].states[currentState].role[rid].display;
+        console.log("Display=", displayData)
+
+        return res.json({status: "success", currentState: currentState, displayObject: displayData});
     })
 );
 
