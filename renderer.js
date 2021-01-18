@@ -373,7 +373,16 @@ function getInstance(instanceID) {
     return instance;
 }
 
+function updateInstance(instanceID, data) {
+    //get json file
+    let fileName = 'instances.JSON';
+    let instances = JSON.parse(fs.readFileSync(fileName).toString());
 
+    //replace old instance data with new instance data
+    instances[instanceID] = data;
+
+    return true;
+}
 
 /**
  * Set up roles array and set user role. Set default states of active machines.
