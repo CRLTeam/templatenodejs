@@ -561,14 +561,16 @@ server.use(
 server.use(
     "/",
     router.get("/createInstance/:tid/:rid", async (req, res) => {
-        console.log("Called createInstance with template=", req.params.tid, " role=", req.params.rid);
+        let tid = req.params.tid;
+        let rid = req.params.rid;
+        console.log("Called createInstance with template=", tid, " role=", rid);
         console.log("States=", states)
-        console.log("Display=", displays["state_f156bc"].roles["default-role"])
-        let currentState = states[req.params.tid][0].currentState;
-        let displayData = allTemplates[req.params.tid].machines[0].states[currentState].role[rid].display;
-        states[req.params.tid]["0"].currentState = "state_f156bc";
-        createInstance(req.params.tid, req.params.rid);
-        return res.json({currentState: currentState, displayObject: displays["state_f156bc"].roles["default-role"]});
+        createInstance(tid, rid);
+        
+        let currentState = states[tid][0].currentState;
+        let displayData = allTemplates[tid].machines[0].states[currentState].role[rid].display;
+        console.log("Display=", displayData)
+        return displayData;//res.json({currentState: currentState, displayObject: displayData});
     })
 );
 

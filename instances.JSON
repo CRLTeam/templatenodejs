@@ -1,3 +1,42 @@
 {
-  
+  "101": {
+    "templateID": "newTemp",
+    "role": "default-role",
+    "context": "newTemp"
+  },
+  "114": {
+    "templateID": "newTemp",
+    "role": "default-role",
+    "context": "newTemp"
+  },
+  "196": {
+    "templateID": "newTemp",
+    "role": "default-role",
+    "context": "newTemp"
+  },
+  "362": {
+    "templateID": "newTemp",
+    "role": "default-role",
+    "context": "newTemp"
+  },
+  "490": {
+    "templateID": "newTemp",
+    "role": "default-role",
+    "context": "newTemp"
+  },
+  "617": {
+    "templateID": "newTemp",
+    "role": "default-role",
+    "context": "newTemp"
+  },
+  "661": {
+    "templateID": "newTemp",
+    "role": "default-role",
+    "context": "newTemp"
+  },
+  "932": {
+    "templateID": "newTemp",
+    "role": "default-role",
+    "context": "newTemp"
+  }
 }
