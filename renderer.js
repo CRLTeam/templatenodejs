@@ -570,7 +570,7 @@ server.use(
         let currentState = states[tid][0].currentState;
         let displayData = allTemplates[tid].machines[0].states[currentState].role[rid].display;
         console.log("Display=", displayData)
-        return displayData;//res.json({currentState: currentState, displayObject: displayData});
+        return res.json({currentState: currentState, displayObject: displayData});
     })
 );
 
