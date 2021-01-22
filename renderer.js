@@ -16,6 +16,7 @@ const { setAllTemplatesDefaults, setRoles } = require('./startup.js');
 const doFunction = require("./functions.js").doFunction;
 const doTransition = require("./transitions.js").doTransition;
 const doBroadcast = require("./transitions.js").doBroadcast;
+const context = require("./context.js").context;
 
 const allTemplates = {};
 let templateID;
@@ -575,11 +576,13 @@ server.use(
 // Create instance
 server.use(
     "/",
-    router.get("/createInstance/:tid/:rid", async (req, res) => {
+    router.get("/createInstance/:tid/:rid/:lang", async (req, res) => {
         //template id
         let tid = req.params.tid;
         //role id
         let rid = req.params.rid;
+        //language
+        let lang = req.params.lang;
         console.log("\n\nCalled createInstance with template=", tid, " role=", rid);
         console.log(`
         
@@ -596,7 +599,19 @@ States= ${states[tid]}
         //get current state
         let currentState = states[tid][0].currentState;
         //get display data for current state
-        let displayData = allTemplates[tid].machines[0].states[currentState].role[rid].display;
+        let display = allTemplates[tid].machines[0].states[currentState].role[rid].display;
+
+        let displayData = [];
+        for (const obj of display.displayData) {
+            console.log('obj ', obj)
+            for (const key in obj) {
+                let val = obj[key];
+                let o = {};
+                o[key] = context[tid][lang][key][val];
+                displayData.push(o);
+            }
+        }
+
         console.log("Display=", displayData)
 
         return res.json({status: "success", currentState: currentState, displayObject: displayData, instanceID: instanceID});
@@ -606,13 +621,15 @@ States= ${states[tid]}
 // Action call
 server.use(
     "/",
-    router.get("/callAction/:iid/:mid/:aid", async (req, res) => {
+    router.get("/callAction/:iid/:mid/:aid/:lang", async (req, res) => {
         //instance id
         let instanceID = req.params.iid;
         //machine id
         let mid = req.params.mid;
         //action id
         let aid = req.params.aid;
+        //language
+        let lang = req.params.lang;
         
         //get instance
         let instance = getInstance(instanceID);
@@ -628,10 +645,10 @@ server.use(
         console.log(`
         
 Called callAction with:
-role=${rid}
-template=${tid}
-machine=${mid}
-action=${aid}
+role= ${rid}
+template= ${tid}
+machine= ${mid}
+action= ${aid}
 
 States= ${JSON.stringify(instanceStates)}
 
@@ -639,16 +656,26 @@ States= ${JSON.stringify(instanceStates)}
 
         try {
             let currentState = states[tid][mid].currentState;
-            let displayData = allTemplates[tid].machines[mid].states[currentState].role[rid].display;
             console.log('current state before call: ', currentState)
             await doAction(aid, mid, "user", rid, tid);
             currentState = states[tid][mid].currentState;
             console.log('current state after call: ', currentState)
-            //console.log("Display=", displayData)
             //replace old instance states with new states
             instance.states = states[tid];
             let updatedInstance = updateInstance(instanceID, instance)
             if(updatedInstance){
+                //get display data for new state
+                let display = allTemplates[tid].machines[mid].states[currentState].role[rid].display;
+    
+                let displayData = [];
+                for (const obj of display.displayData) {
+                    for (const key in obj) {
+                        let val = obj[key];
+                        let o = {};
+                        o[key] = context[tid][lang][key][val];
+                        displayData.push(o);
+                    }
+                }
                 return res.json({status: "success", currentState: currentState, displayObject: displayData});
             }else {
                 return res.json({status: "fail"})
@@ -665,11 +692,13 @@ States= ${JSON.stringify(instanceStates)}
 // User status
 server.use(
     "/",
-    router.get("/currentUserStatus/:iid/:mid", async (req , res) => {
+    router.get("/currentUserStatus/:iid/:mid/:lang", async (req , res) => {
         //instance id
         let instanceID = req.params.iid;
         //machine id
         let mid = req.params.mid;
+        //language
+        let lang = req.params.lang;
       
         //get instance
         let instance = getInstance(instanceID);
@@ -696,7 +725,18 @@ States= ${JSON.stringify(instanceStates)}
         //get current state
         let currentState = instanceStates[mid].currentState;
         //get display data for current state
-        let displayData = allTemplates[tid].machines[0].states[currentState].role[rid].display;
+        let display = allTemplates[tid].machines[mid].states[currentState].role[rid].display;
+
+        let displayData = [];
+        for (const obj of display.displayData) {
+            console.log('obj ', obj)
+            for (const key in obj) {
+                let val = obj[key];
+                let o = {};
+                o[key] = context[tid][lang][key][val];
+                displayData.push(o);
+            }
+        }
         console.log("Display=", displayData)
 
         return res.json({status: "success", currentState: currentState, displayObject: displayData});

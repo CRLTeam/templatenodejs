@@ -1520,7 +1520,7 @@ const newTemp =   {
                             "display": {
                                 "description": "title",
                                 "displayData": [
-                                    {title: 4},
+                                    {text: 4},
                                     {button: 4}
                                 ]
                             },
