@@ -1,0 +1,195 @@
+{
+  "3": {
+    "templateID": "newTemp",
+    "role": "default-role",
+    "context": "newTemp",
+    "states": {
+      "0": {
+        "concurrent": false,
+        "displayName": "/",
+        "currentState": "state-ff6d12"
+      },
+      "machine-1": {
+        "concurrent": false,
+        "displayName": "/first",
+        "currentState": null
+      }
+    }
+  },
+  "50": {
+    "templateID": "newTemp",
+    "role": "default-role",
+    "context": "newTemp",
+    "states": {}
+  },
+  "71": {
+    "templateID": "newTemp",
+    "role": "default-role",
+    "context": "newTemp",
+    "states": {
+      "0": {
+        "concurrent": false,
+        "displayName": "/",
+        "currentState": "state-ff6d12"
+      },
+      "machine-1": {
+        "concurrent": false,
+        "displayName": "/first",
+        "currentState": null
+      }
+    }
+  },
+  "118": {
+    "templateID": "newTemp",
+    "role": "default-role",
+    "context": "newTemp",
+    "states": {
+      "0": {
+        "concurrent": false,
+        "displayName": "/",
+        "currentState": "state-ff6d12"
+      },
+      "machine-1": {
+        "concurrent": false,
+        "displayName": "/first",
+        "currentState": null
+      }
+    }
+  },
+  "438": {
+    "templateID": "newTemp",
+    "role": "default-role",
+    "context": "newTemp",
+    "states": {
+      "0": {
+        "concurrent": false,
+        "displayName": "/",
+        "currentState": "state-ff6d12"
+      },
+      "machine-1": {
+        "concurrent": false,
+        "displayName": "/first",
+        "currentState": null
+      }
+    }
+  },
+  "650": {
+    "templateID": "newTemp",
+    "role": "default-role",
+    "context": "newTemp",
+    "states": {
+      "0": {
+        "concurrent": false,
+        "displayName": "/",
+        "currentState": "state-ff6d12"
+      },
+      "machine-1": {
+        "concurrent": false,
+        "displayName": "/first",
+        "currentState": null
+      }
+    }
+  },
+  "661": {
+    "templateID": "newTemp",
+    "role": "default-role",
+    "context": "newTemp",
+    "states": {
+      "0": {
+        "concurrent": false,
+        "displayName": "/",
+        "currentState": "state-ff6d12"
+      },
+      "machine-1": {
+        "concurrent": false,
+        "displayName": "/first",
+        "currentState": null
+      }
+    }
+  },
+  "762": {
+    "templateID": "newTemp",
+    "role": "default-role",
+    "context": "newTemp",
+    "states": {
+      "0": {
+        "concurrent": false,
+        "displayName": "/",
+        "currentState": "state-ff6d12"
+      },
+      "machine-1": {
+        "concurrent": false,
+        "displayName": "/first",
+        "currentState": null
+      }
+    }
+  },
+  "782": {
+    "templateID": "newTemp",
+    "role": "default-role",
+    "context": "newTemp",
+    "states": {
+      "0": {
+        "concurrent": false,
+        "displayName": "/",
+        "currentState": "state-ff6d12"
+      },
+      "machine-1": {
+        "concurrent": false,
+        "displayName": "/first",
+        "currentState": null
+      }
+    }
+  },
+  "791": {
+    "templateID": "newTemp",
+    "role": "default-role",
+    "context": "newTemp",
+    "states": {
+      "0": {
+        "concurrent": false,
+        "displayName": "/",
+        "currentState": "state-ff6d12"
+      },
+      "machine-1": {
+        "concurrent": false,
+        "displayName": "/first",
+        "currentState": null
+      }
+    }
+  },
+  "801": {
+    "templateID": "newTemp",
+    "role": "default-role",
+    "context": "newTemp",
+    "states": {
+      "0": {
+        "concurrent": false,
+        "displayName": "/",
+        "currentState": "state-ff6d12"
+      },
+      "machine-1": {
+        "concurrent": false,
+        "displayName": "/first",
+        "currentState": null
+      }
+    }
+  },
+  "983": {
+    "templateID": "newTemp",
+    "role": "default-role",
+    "context": "newTemp",
+    "states": {
+      "0": {
+        "concurrent": false,
+        "displayName": "/",
+        "currentState": "state-ff6d12"
+      },
+      "machine-1": {
+        "concurrent": false,
+        "displayName": "/first",
+        "currentState": null
+      }
+    }
+  }
+}
