@@ -1352,6 +1352,8 @@ const newTemp =   {
                                 "description": "title",
                                 "displayData": [
                                     {title: 1},
+                                    {header: 1},
+                                    {image: 1},
                                     {button: 1}
                                 ]
                             },
