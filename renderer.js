@@ -7,6 +7,9 @@ const readline = require("readline").createInterface({
     output: process.stdout,
 });
 
+const axios = require('axios');
+const serverUrl = 'http://localhost:3001';
+
 const fs = require("fs");
 // const microwave = require("./template.js");
 // const tbb = require("./tbb.js");
@@ -21,6 +24,19 @@ const context = require("./context.js").context;
 const allTemplates = {};
 let templateID;
 let template;
+
+//mongo server stuff
+
+const express = require('express')
+const bodyParser = require('body-parser')
+const cors = require('cors')
+const app = express()
+const apiPort = 3001
+
+const db = require("./database/db/db.js")
+const dbRouter = require("./database/routes/router.js")
+
+//
 
 //states and role
 let states = {};
@@ -335,59 +351,77 @@ function getDisplayData(machineName, tid, state, userRole = role) {
     };
 }
 
-function createInstance(tid, rid, states) {
-    //get json file
-    let fileName = 'instances.JSON';
-    let instances = JSON.parse(fs.readFileSync(fileName).toString());
-    
-    //create instance ID
-    let instanceID;
-    do{
-        instanceID = Math.floor(Math.random()*999); 
-    } while(instances[instanceID])
+async function createInstance(tid, rid, states) {
 
-    // create instance 
-    let newInstance = {
-            templateID: tid,
-            role: rid,
-            context: tid,
-            states: states
-    };
-        
-    //add new instance to all instances
-    instances[instanceID] = newInstance;
-    
-    //write to file
-    fs.writeFile('instances.JSON', JSON.stringify(instances, null, 2), function writeJSON(err) {
-        if (err) return console.log(err);
-    });
+    try{
+        //create instance ID
+        let instanceID = Math.floor(Math.random()*9999999);
 
-    return instanceID;
+        await axios({
+            method: 'post',
+            url: `${serverUrl}/api/addInstance`,
+            data: {
+                _id: instanceID,
+                templateID: tid,
+                role: rid,
+                context: tid,
+                states: JSON.stringify(states)
+            }
+        });
+
+        return instanceID;
+    }catch(err){
+        console.log ('ERROR: ', err)
+        return false;
+    }
 } 
 
-function getInstance(instanceID) {
-    //get json file
-    let fileName = 'instances.JSON';
-    let instances = JSON.parse(fs.readFileSync(fileName).toString());
-    let instance = instances[instanceID];
+async function getInstance(instanceID) {
+    
+    try{
+        const res = await axios({
+            method: 'get',
+            url: `${serverUrl}/api/getInstance/${instanceID}`
+        }).then(response =>{
+                response = response.data.data;
+                let instance = {
+                    templateID: response.templateID,
+                    role: response.role,
+                    context: response.context,
+                    states: JSON.parse(response.states)
+                    };
 
-    return instance;
+                return instance;
+            });
+
+        return res;
+    }catch(err){
+        console.log ('ERROR: ', err)
+        return false;
+    }
 }
 
-function updateInstance(instanceID, data) {
-    //get json file
-    let fileName = 'instances.JSON';
-    let instances = JSON.parse(fs.readFileSync(fileName).toString());
+async function updateInstance(instanceID, data) {
+    
+    try {
 
-    //replace old instance data with new instance data
-    instances[instanceID] = data;
-
-    //write to file
-    fs.writeFile('instances.JSON', JSON.stringify(instances, null, 2), function writeJSON(err) {
-        if (err) return console.log(err);
-    });
-
-    return true;
+        await axios({
+            method: 'put',
+            url: `${serverUrl}/api/updateInstance/${instanceID}`,
+            data: {
+                templateID: data.templateID,
+                role: data.role,
+                context: data.context,
+                states: JSON.stringify(data.states)
+            }
+        });
+        
+        //return true if successfully updated
+        return true;
+    }catch(err){
+        console.log ('ERROR: ', err)
+        return false;
+    }
 }
 
 /**
@@ -395,6 +429,24 @@ function updateInstance(instanceID, data) {
  */
 async function start() {    
     // TODO: have to enter "user" for state machine to init for testing REST API.
+
+    //run mongo db server
+    app.use(bodyParser.urlencoded({ extended: true }))
+    app.use(cors())
+    app.use(bodyParser.json())
+
+    db.on('error', console.error.bind(console, 'MongoDB connection error:'))
+
+    app.get('/', (req, res) => {
+        res.send('Hello World!')
+    })
+
+    app.use('/api', dbRouter)
+
+    app.listen(apiPort, () => console.log(`Mongo server running on port ${apiPort}`))
+
+    await new Promise(r => setTimeout(r, 500));
+
     do {
         // Get user input to set template
         tid = await getInput("Please enter template ID: ");
@@ -510,8 +562,6 @@ async function main() {
 const { isNull } = require("util");
 
 // Create an express server.
-const express = require("express");
-const cors = require("cors");
 const { response } = require("express");
 const server = express();
 server.use(express.json());
@@ -583,7 +633,6 @@ server.use(
         let rid = req.params.rid;
         //language
         let lang = req.params.lang;
-        console.log("\n\nCalled createInstance with template=", tid, " role=", rid);
         console.log(`
         
 Called createInstance with:
@@ -593,8 +642,9 @@ role=${rid}
 States= ${states[tid]}
 
 `);
+
         //create instance and store instance id
-        let instanceID = createInstance(tid, rid, states[tid]);
+        let instanceID = await createInstance(tid, rid, states[tid]);
         
         //get current state
         let currentState = states[tid][0].currentState;
@@ -603,7 +653,6 @@ States= ${states[tid]}
 
         let displayData = [];
         for (const obj of display.displayData) {
-            console.log('obj ', obj)
             for (const key in obj) {
                 let val = obj[key];
                 let o = {};
@@ -632,7 +681,7 @@ server.use(
         let lang = req.params.lang;
         
         //get instance
-        let instance = getInstance(instanceID);
+        let instance = await getInstance(instanceID);
         //role id
         let rid = instance.role;
         //template id
@@ -656,13 +705,11 @@ States= ${JSON.stringify(instanceStates)}
 
         try {
             let currentState = states[tid][mid].currentState;
-            console.log('current state before call: ', currentState)
             await doAction(aid, mid, "user", rid, tid);
             currentState = states[tid][mid].currentState;
-            console.log('current state after call: ', currentState)
             //replace old instance states with new states
             instance.states = states[tid];
-            let updatedInstance = updateInstance(instanceID, instance)
+            let updatedInstance = await updateInstance(instanceID, instance)
             if(updatedInstance){
                 //get display data for new state
                 let display = allTemplates[tid].machines[mid].states[currentState].role[rid].display;
@@ -701,7 +748,7 @@ server.use(
         let lang = req.params.lang;
       
         //get instance
-        let instance = getInstance(instanceID);
+        let instance = await getInstance(instanceID);
         //role id
         let rid = instance.role;
         //template id
@@ -729,7 +776,6 @@ States= ${JSON.stringify(instanceStates)}
 
         let displayData = [];
         for (const obj of display.displayData) {
-            console.log('obj ', obj)
             for (const key in obj) {
                 let val = obj[key];
                 let o = {};

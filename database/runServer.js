@@ -19,4 +19,4 @@ app.get('/', (req, res) => {
 
 app.use('/api', router)
 
-app.listen(apiPort, () => console.log(`Server running on port ${apiPort}`))
+app.listen(apiPort, () => console.log(`Mongo server running on port ${apiPort}`))
