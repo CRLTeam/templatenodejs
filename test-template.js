@@ -1550,9 +1550,565 @@ const newTemp =   {
       }
     }
   
-  
+///////////////////// TODO: nothing, using as bookmark for displayer
+    const displayer =   {
+        "uid": "displayer",
+        "roles": {
+            "default-role": {
+              "displayName": "Default role"
+            }
+          },
+          "machines": {
+            "0": {
+                "displayName": "/",
+                "parent": null,
+                "default": "state-ff6d12",
+                "concurrent": false,
+                "history": false,
+                "transitions": {},
+                "actions": {},
+                "states": {
+                    "state-ff6d12": {
+                        "displayName": "menu",
+                        "machine": null,
+                        "composite": false,
+                        "entry": [],
+                        "exit": [],
+                        "transitions": {
+                            "90e585": {
+                                "displayName": "image",
+                                "from": {
+                                    "machine": "0",
+                                    "uid": "state-ff6d12"
+                                },
+                                "to": {
+                                    "machine": "0",
+                                    "uid": "state-c5df3d"
+                                }
+                            },
+                            "aSFaCv": {
+                                "displayName": "video",
+                                "from": {
+                                    "machine": "0",
+                                    "uid": "state-ff6d12"
+                                },
+                                "to": {
+                                    "machine": "0",
+                                    "uid": "state-YS0rHZ"
+                                }
+                            },
+                            "lnKxrX": {
+                                "displayName": "radio",
+                                "from": {
+                                    "machine": "0",
+                                    "uid": "state-ff6d12"
+                                },
+                                "to": {
+                                    "machine": "0",
+                                    "uid": "state-aRJkHJ"
+                                }
+                            },
+                            "wKLr9q": {
+                                "displayName": "checkbox",
+                                "from": {
+                                    "machine": "0",
+                                    "uid": "state-ff6d12"
+                                },
+                                "to": {
+                                    "machine": "0",
+                                    "uid": "state-38o8Oz"
+                                }
+                            },
+                            "wDMfP3": {
+                                "displayName": "dropdown",
+                                "from": {
+                                    "machine": "0",
+                                    "uid": "state-ff6d12"
+                                },
+                                "to": {
+                                    "machine": "0",
+                                    "uid": "state-goazMT"
+                                }
+                            },
+                            "NLVpTG": {
+                                "displayName": "textbox",
+                                "from": {
+                                    "machine": "0",
+                                    "uid": "state-ff6d12"
+                                },
+                                "to": {
+                                    "machine": "0",
+                                    "uid": "state-xJsuJD"
+                                }
+                            },
+                            "uQGi41": {
+                                "displayName": "date&time",
+                                "from": {
+                                    "machine": "0",
+                                    "uid": "state-ff6d12"
+                                },
+                                "to": {
+                                    "machine": "0",
+                                    "uid": "state-SyoYJT"
+                                }
+                            }
+                        },
+                        "role": {
+                            "default-role":{
+                                "display": {
+                                    "description": "title",
+                                    "displayData": [
+                                        {title: 0},
+                                        {menu: 1}
+                                    ]
+                                },
+                                "actions": {
+                                    "action-xKdoWs": {
+                                        "displayName": "image",
+                                        "action": [
+                                            {
+                                                "condition": true,
+                                                "events": [
+                                                    {
+                                                        "type": "transition",
+                                                        "do": "90e585"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "action-YFnQ8Q": {
+                                        "displayName": "video",
+                                        "action": [
+                                            {
+                                                "condition": true,
+                                                "events": [
+                                                    {
+                                                        "type": "transition",
+                                                        "do": "aSFaCv"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "action-qYrGjY": {
+                                        "displayName": "radio",
+                                        "action": [
+                                            {
+                                                "condition": true,
+                                                "events": [
+                                                    {
+                                                        "type": "transition",
+                                                        "do": "lnKxrX"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "action-d1I57x": {
+                                        "displayName": "checkbox",
+                                        "action": [
+                                            {
+                                                "condition": true,
+                                                "events": [
+                                                    {
+                                                        "type": "transition",
+                                                        "do": "wKLr9q"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "action-Xk0kWS": {
+                                        "displayName": "dropdown",
+                                        "action": [
+                                            {
+                                                "condition": true,
+                                                "events": [
+                                                    {
+                                                        "type": "transition",
+                                                        "do": "wDMfP3"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "action-rdGbbT": {
+                                        "displayName": "text",
+                                        "action": [
+                                            {
+                                                "condition": true,
+                                                "events": [
+                                                    {
+                                                        "type": "transition",
+                                                        "do": "NLVpTG"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "action-gs2tio": {
+                                        "displayName": "date&time",
+                                        "action": [
+                                            {
+                                                "condition": true,
+                                                "events": [
+                                                    {
+                                                        "type": "transition",
+                                                        "do": "uQGi41"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "state-c5df3d": {
+                        "displayName": "image",
+                        "machine": null,
+                        "composite": false,
+                        "entry": [],
+                        "exit": [],
+                        "transitions": {
+                            "LPiqRQ": {
+                                "displayName": "menu",
+                                "from": {
+                                    "machine": "0",
+                                    "uid": "state-c5df3d"
+                                },
+                                "to": {
+                                    "machine": "0",
+                                    "uid": "state-ff6d12"
+                                }
+                            }
+                        },
+                        "role": {
+                            "default-role":{
+                                "display": {
+                                    "description": "image",
+                                    "displayData": [
+                                        {title: 1},
+                                        {image: 1},
+                                        {button: 1}
+                                    ]
+                                },
+                                "actions": {
+                                    "action-7a9cf8": {
+                                        "displayName": "return to menu",
+                                        "action": [
+                                            {
+                                                "condition": true,
+                                                "events": [
+                                                    {
+                                                        "type": "transition",
+                                                        "do": "LPiqRQ"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "state-YS0rHZ": {
+                        "displayName": "video",
+                        "machine": null,
+                        "composite": false,
+                        "entry": [],
+                        "exit": [],
+                        "transitions": {
+                            "r8WfZg": {
+                                "displayName": "menu",
+                                "from": {
+                                    "machine": "0",
+                                    "uid": "state-YS0rHZ"
+                                },
+                                "to": {
+                                    "machine": "0",
+                                    "uid": "state-ff6d12"
+                                }
+                            }
+                        },
+                        "role": {
+                            "default-role":{
+                                "display": {
+                                    "description": "video",
+                                    "displayData": [
+                                        {title: 2},
+                                        {video: 1},
+                                        {button: 1}
+                                    ]
+                                },
+                                "actions": {
+                                    "action-7a9cf8": {
+                                        "displayName": "return to menu",
+                                        "action": [
+                                            {
+                                                "condition": true,
+                                                "events": [
+                                                    {
+                                                        "type": "transition",
+                                                        "do": "r8WfZg"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "state-aRJkHJ": {
+                        "displayName": "radio",
+                        "machine": null,
+                        "composite": false,
+                        "entry": [],
+                        "exit": [],
+                        "transitions": {
+                            "1tICXi": {
+                                "displayName": "menu",
+                                "from": {
+                                    "machine": "0",
+                                    "uid": "state-aRJkHJ"
+                                },
+                                "to": {
+                                    "machine": "0",
+                                    "uid": "state-ff6d12"
+                                }
+                            }
+                        },
+                        "role": {
+                            "default-role":{
+                                "display": {
+                                    "description": "radio",
+                                    "displayData": [
+                                        {title: 3},
+                                        {radioButtonList: 1},
+                                        {button: 1}
+                                    ]
+                                },
+                                "actions": {
+                                    "action-7a9cf8": {
+                                        "displayName": "return to menu",
+                                        "action": [
+                                            {
+                                                "condition": true,
+                                                "events": [
+                                                    {
+                                                        "type": "transition",
+                                                        "do": "1tICXi"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "state-38o8Oz": {
+                        "displayName": "checkbox",
+                        "machine": null,
+                        "composite": false,
+                        "entry": [],
+                        "exit": [],
+                        "transitions": {
+                            "meAqCz": {
+                                "displayName": "menu",
+                                "from": {
+                                    "machine": "0",
+                                    "uid": "state-38o8Oz"
+                                },
+                                "to": {
+                                    "machine": "0",
+                                    "uid": "state-ff6d12"
+                                }
+                            }
+                        },
+                        "role": {
+                            "default-role":{
+                                "display": {
+                                    "description": "checkbox",
+                                    "displayData": [
+                                        {title: 4},
+                                        {checkBoxList: 1},
+                                        {button: 1}
+                                    ]
+                                },
+                                "actions": {
+                                    "action-7a9cf8": {
+                                        "displayName": "return to menu",
+                                        "action": [
+                                            {
+                                                "condition": true,
+                                                "events": [
+                                                    {
+                                                        "type": "transition",
+                                                        "do": "meAqCz"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "state-goazMT": {
+                        "displayName": "dropdown",
+                        "machine": null,
+                        "composite": false,
+                        "entry": [],
+                        "exit": [],
+                        "transitions": {
+                            "HPZQdy": {
+                                "displayName": "menu",
+                                "from": {
+                                    "machine": "0",
+                                    "uid": "state-goazMT"
+                                },
+                                "to": {
+                                    "machine": "0",
+                                    "uid": "state-ff6d12"
+                                }
+                            }
+                        },
+                        "role": {
+                            "default-role":{
+                                "display": {
+                                    "description": "dropdown",
+                                    "displayData": [
+                                        {title: 5},
+                                        {dropDownSelect: 1},
+                                        {button: 1}
+                                    ]
+                                },
+                                "actions": {
+                                    "action-7a9cf8": {
+                                        "displayName": "return to menu",
+                                        "action": [
+                                            {
+                                                "condition": true,
+                                                "events": [
+                                                    {
+                                                        "type": "transition",
+                                                        "do": "HPZQdy"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "state-xJsuJD": {
+                        "displayName": "textbox",
+                        "machine": null,
+                        "composite": false,
+                        "entry": [],
+                        "exit": [],
+                        "transitions": {
+                            "0rDb8M": {
+                                "displayName": "menu",
+                                "from": {
+                                    "machine": "0",
+                                    "uid": "state-xJsuJD"
+                                },
+                                "to": {
+                                    "machine": "0",
+                                    "uid": "state-ff6d12"
+                                }
+                            }
+                        },
+                        "role": {
+                            "default-role":{
+                                "display": {
+                                    "description": "textbox",
+                                    "displayData": [
+                                        {title: 6},
+                                        {shortTextInput: 1},
+                                        {paragraphInput: 1},
+                                        {button: 1}
+                                    ]
+                                },
+                                "actions": {
+                                    "action-7a9cf8": {
+                                        "displayName": "return to menu",
+                                        "action": [
+                                            {
+                                                "condition": true,
+                                                "events": [
+                                                    {
+                                                        "type": "transition",
+                                                        "do": "0rDb8M"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "state-SyoYJT": {
+                        "displayName": "date&time",
+                        "machine": null,
+                        "composite": false,
+                        "entry": [],
+                        "exit": [],
+                        "transitions": {
+                            "dqZBSS": {
+                                "displayName": "menu",
+                                "from": {
+                                    "machine": "0",
+                                    "uid": "state-SyoYJT"
+                                },
+                                "to": {
+                                    "machine": "0",
+                                    "uid": "state-ff6d12"
+                                }
+                            }
+                        },
+                        "role": {
+                            "default-role":{
+                                "display": {
+                                    "description": "date and time",
+                                    "displayData": [
+                                        {title: 7},
+                                        {dateInput: 1},
+                                        {timeInput: 1},
+                                        {button: 1}
+                                    ]
+                                },
+                                "actions": {
+                                    "action-7a9cf8": {
+                                        "displayName": "return to menu",
+                                        "action": [
+                                            {
+                                                "condition": true,
+                                                "events": [
+                                                    {
+                                                        "type": "transition",
+                                                        "do": "dqZBSS"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                },
+            }
+          }
+        }
 
-let allTemplates = [simple, lights, funcTest, newTemp];
+let allTemplates = [simple, lights, funcTest, newTemp, displayer];
 
 exports.allTemplates = allTemplates;
 exports.test1 = test1;

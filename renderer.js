@@ -111,7 +111,7 @@ function getMachine(machine, tid) {
  * @param {string} tid     template ID, set to templateID global variable by default
  * @returns {boolean} true if action exists
  */
-function actionExists(action, machine, tid = templateID) {
+function actionExists(action, machine, role, tid = templateID) {
     setTemplate(tid);
     let currState = states[tid][machine].currentState;
     
@@ -186,7 +186,7 @@ async function doAction(actionName, machineName, type, role, tid = templateID, d
         }
 
         //check if action exists
-        if (!actionExists(actionName, machineName)) {
+        if (!actionExists(actionName, machineName, role)) {
             reject(`Action "${actionName}" does not exist in the machine ${machineName}`);
             return;
         }
