@@ -1,67 +1,67 @@
-const Template = require('../models/model.js');
+const Instance = require('../models/instanceModel.js');
 
-addTemplate = (req, res) => {
+addInstance = (req, res) => {
     const body = req.body
 
     if (!body) {
         return res.status(400).json({
             success: false,
-            error: 'must provide template',
+            error: 'must provide instance',
         })
     }
 
-    const template = new Template(body);
+    const instance = new Instance(body);
 
-    if (!template) {
+    if (!instance) {
         return res.status(400).json({ success: false, error: err })
     }
 
-    template
+    instance
         .save()
         .then(() => {
             return res.status(201).json({
                 success: true,
-                id: template._id,
-                message: 'Template created!',
+                id: instance._id,
+                message: 'instance created!',
             })
         })
         .catch(error => {
             return res.status(400).json({
                 error,
-                message: 'Template not created!',
+                message: 'instance not created!',
             })
         })
 }
 
-getTemplateById = async (req, res) => {
-    await Template.findOne({ _id: req.params.id }, (err, template) => {
+getInstanceById = async (req, res) => {
+    await Instance.findOne({ _id: req.params.id }, (err, instance) => {
         if (err) {
             return res.status(400).json({ success: false, error: err })
         }
-        if (!template) {
+        if (!instance) {
             return res
                 .status(404)
-                .json({ success: false, error: `Template not found` })
+                .json({ success: false, error: `instance not found` })
         }
-        return res.status(200).json({ success: true, data: template })
+        return res.status(200).json({ success: true, data: instance })
     }).catch(err => console.log(err))
 }
 
-getTemplates = async (req, res) => {
-    await Template.find({}, (err, templates) => {
+getInstance = async (req, res) => {
+    await Instance.find({}, (err, instances) => {
         if (err) {
             return res.status(400).json({ success: false, error: err })
         }
-        if (!templates.length) {
+        if (!instances.length) {
             return res
                 .status(404)
-                .json({ success: false, error: `Templates not found` })
+                .json({ success: false, error: `instances not found` })
         }
-        return res.status(200).json({ success: true, data: templates })
+        return res.status(200).json({ success: true, data: instances })
     }).catch(err => console.log(err))
 }
 
-updateTemplate = async (req, res) => {
+updateInstance = async (req, res) => {
     const body = req.body
 
     if (!body) {
@@ -71,35 +71,41 @@ updateTemplate = async (req, res) => {
         })
     }
 
-    Template.findOne({ _id: req.params.id }, (err, template) => {
+    Instance.findOne({ _id: req.params.id }, (err, instance) => {
         if (err) {
             return res.status(404).json({
                 err,
-                message: 'Template not found',
+                message: 'instance not found',
             })
         }
-        template.data = body.data
-        template
+        instance.templateID = body.templateID;
+        instance.context = body.context;
+        instance.states = body.states;
+        if(body.role){
+            instance.role = body.role;
+        }
+
+        instance
             .save()
             .then(() => {
                 return res.status(200).json({
                     success: true,
-                    id: template._id,
-                    message: 'Template updated',
+                    id: instance._id,
+                    message: 'instance updated',
                 })
             })
             .catch(error => {
                 return res.status(404).json({
                     error,
-                    message: 'Template not updated',
+                    message: 'instance not updated',
                 })
             })
     })
 }
 
 module.exports = {
-    addTemplate,
-    getTemplates,
-    getTemplateById,
-    updateTemplate
+    addInstance,
+    getInstanceById,
+    getInstance,
+    updateInstance
 }

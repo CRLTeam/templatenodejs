@@ -7,6 +7,9 @@ const readline = require("readline").createInterface({
     output: process.stdout,
 });
 
+const axios = require('axios');
+const serverUrl = 'http://localhost:3001';
+
 const fs = require("fs");
 // const microwave = require("./template.js");
 // const tbb = require("./tbb.js");
@@ -16,10 +19,24 @@ const { setAllTemplatesDefaults, setRoles } = require('./startup.js');
 const doFunction = require("./functions.js").doFunction;
 const doTransition = require("./transitions.js").doTransition;
 const doBroadcast = require("./transitions.js").doBroadcast;
+const context = require("./context.js").context;
 
 const allTemplates = {};
 let templateID;
 let template;
+
+//mongo server stuff
+
+const express = require('express')
+const bodyParser = require('body-parser')
+const cors = require('cors')
+const app = express()
+const apiPort = 3001
+
+const db = require("./database/db/db.js")
+const dbRouter = require("./database/routes/router.js")
+
+//
 
 //states and role
 let states = {};
@@ -334,40 +351,77 @@ function getDisplayData(machineName, tid, state, userRole = role) {
     };
 }
 
-function createInstance(tid, rid) {
-    //get json file
-    let fileName = 'instances.JSON';
-    let instances = JSON.parse(fs.readFileSync(fileName).toString());
-    
-    //create instance ID
-    let instanceID;
-    do{
-        instanceID = Math.floor(Math.random()*999); 
-    } while(instances[instanceID])
+async function createInstance(tid, rid, states) {
 
-    // create instance 
-    let newInstance = {
-            templateID: tid,
-            role: rid,
-            context: tid
-    };
-        
-    //add new instance to all instances
-    instances[instanceID] = newInstance;
-    
-    //write to file
-    fs.writeFile('instances.JSON', JSON.stringify(instances, null, 2), function writeJSON(err) {
-        if (err) return console.log(err);
-    });
+    try{
+        //create instance ID
+        let instanceID = Math.floor(Math.random()*9999999);
+
+        await axios({
+            method: 'post',
+            url: `${serverUrl}/api/addInstance`,
+            data: {
+                _id: instanceID,
+                templateID: tid,
+                role: rid,
+                context: tid,
+                states: JSON.stringify(states)
+            }
+        });
+
+        return instanceID;
+    }catch(err){
+        console.log ('ERROR: ', err)
+        return false;
+    }
 } 
 
-function getInstance(instanceID) {
-    //get json file
-    let fileName = 'instances.JSON';
-    let instances = JSON.parse(fs.readFileSync(fileName).toString());
-    console.log(`INSTANCE ${instanceID}`, instances[instanceID]);
+async function getInstance(instanceID) {
+    
+    try{
+        const res = await axios({
+            method: 'get',
+            url: `${serverUrl}/api/getInstance/${instanceID}`
+        }).then(response =>{
+                response = response.data.data;
+                let instance = {
+                    templateID: response.templateID,
+                    role: response.role,
+                    context: response.context,
+                    states: JSON.parse(response.states)
+                    };
 
-    return instances;
+                return instance;
+            });
+
+        return res;
+    }catch(err){
+        console.log ('ERROR: ', err)
+        return false;
+    }
+}
+
+async function updateInstance(instanceID, data) {
+    
+    try {
+
+        await axios({
+            method: 'put',
+            url: `${serverUrl}/api/updateInstance/${instanceID}`,
+            data: {
+                templateID: data.templateID,
+                role: data.role,
+                context: data.context,
+                states: JSON.stringify(data.states)
+            }
+        });
+        
+        //return true if successfully updated
+        return true;
+    }catch(err){
+        console.log ('ERROR: ', err)
+        return false;
+    }
 }
 
 /**
@@ -375,6 +429,24 @@ function getInstance(instanceID) {
  */
 async function start() {    
     // TODO: have to enter "user" for state machine to init for testing REST API.
+
+    //run mongo db server
+    app.use(bodyParser.urlencoded({ extended: true }))
+    app.use(cors())
+    app.use(bodyParser.json())
+
+    db.on('error', console.error.bind(console, 'MongoDB connection error:'))
+
+    app.get('/', (req, res) => {
+        res.send('Hello World!')
+    })
+
+    app.use('/api', dbRouter)
+
+    app.listen(apiPort, () => console.log(`Mongo server running on port ${apiPort}`))
+
+    await new Promise(r => setTimeout(r, 500));
+
     do {
         // Get user input to set template
         tid = await getInput("Please enter template ID: ");
@@ -389,7 +461,7 @@ async function start() {
     //ask user to set their role
     let roles = setRoles(templateID);
     let userRole;
-
+    
     while (true) {
         userRole = await getInput(`Please select a role [${roles}]: `);
         if (!roles.includes(userRole)) {
@@ -425,7 +497,6 @@ async function main() {
 
     //set up all needed global variables and arrays
     await start();
-
     let input;
 
     cli: while (true) {
@@ -491,8 +562,6 @@ async function main() {
 const { isNull } = require("util");
 
 // Create an express server.
-const express = require("express");
-const cors = require("cors");
 const { response } = require("express");
 const server = express();
 server.use(express.json());
@@ -502,6 +571,8 @@ server.use(cors());
 // Express routes
 const router = express.Router();
 
+//UNUSED CALLS
+/** 
 server.use(
     "/",
     router.get("/show_all_states/:tid", async (req, res) => {
@@ -547,6 +618,7 @@ server.use(
         }
     })
 );
+**/
 
 // Express routes
 // const router = express.Router();
@@ -554,36 +626,111 @@ server.use(
 // Create instance
 server.use(
     "/",
-    router.get("/createInstance/:tid/:rid", async (req, res) => {
-        console.log("Called createInstance with template=", req.params.tid, " role=", req.params.rid);
-        console.log("States=", states)
-        // console.log("Display=", displays["state_f156bc"].roles["default-role"])
-        states[req.params.tid]["0"].currentState = "state_f156bc";
-        createInstance(req.params.tid, req.params.rid);
+    router.get("/createInstance/:tid/:rid/:lang", async (req, res) => {
+        //template id
+        let tid = req.params.tid;
+        //role id
+        let rid = req.params.rid;
+        //language
+        let lang = req.params.lang;
+        console.log(`
+        
+Called createInstance with:
+template=${tid}
+role=${rid}
 
-        let currentState = states[req.params.tid][0].currentState;
-        let displayData = allTemplates[req.params.tid].machines[0].states[currentState].role[rid].display;
-        return displayData;//res.json({currentState: "state_f156bc", displayObject: displays["state_f156bc"].roles["default-role"]});
+States= ${states[tid]}
+
+`);
+
+        //create instance and store instance id
+        let instanceID = await createInstance(tid, rid, states[tid]);
+        
+        //get current state
+        let currentState = states[tid][0].currentState;
+        //get display data for current state
+        let display = allTemplates[tid].machines[0].states[currentState].role[rid].display;
+
+        let displayData = [];
+        for (const obj of display.displayData) {
+            for (const key in obj) {
+                let val = obj[key];
+                let o = {};
+                o[key] = context[tid][lang][key][val];
+                displayData.push(o);
+            }
+        }
+
+        console.log("Display=", displayData)
+
+        return res.json({status: "success", currentState: currentState, displayObject: displayData, instanceID: instanceID});
     })
 );
 
 // Action call
 server.use(
     "/",
-    router.get("/callAction/:tid/:sid/:aid/:rid", async (req, res) => {
-        let currState = states[templateID][machineName].curreentState;
-        console.log("Called callAction with template=", req.params.tid, " state=", req.params.sid, " action=", req.params.aid, " role=", req.params.rid);
-        console.log("States=", states)
-        console.log("Display=", displays[currState].roles[req.params.id])
+    router.get("/callAction/:iid/:mid/:aid/:lang", async (req, res) => {
+        //instance id
+        let instanceID = req.params.iid;
+        //machine id
+        let mid = req.params.mid;
+        //action id
+        let aid = req.params.aid;
+        //language
+        let lang = req.params.lang;
+        
+        //get instance
+        let instance = await getInstance(instanceID);
+        //role id
+        let rid = instance.role;
+        //template id
+        let tid = instance.templateID;
+        //instance states
+        let instanceStates = instance.states;
+        //set current states object to instance's states object
+        states[tid] = instanceStates;
+
+        console.log(`
+        
+Called callAction with:
+role= ${rid}
+template= ${tid}
+machine= ${mid}
+action= ${aid}
+
+States= ${JSON.stringify(instanceStates)}
+
+`);
+
         try {
-            console.log("doAction call");
-            await doAction(req.params.aid, "0", "user", req.params.rid, req.params.tid);
-            console.log("doAction called new state=", states[req.params.tid]["0"].currentState);
-            return res.json({currentState: states[req.params.tid]["0"].currentState, displayObject: displays[states[req.params.tid]["0"].currentState].roles[req.params.rid]});
+            let currentState = states[tid][mid].currentState;
+            await doAction(aid, mid, "user", rid, tid);
+            currentState = states[tid][mid].currentState;
+            //replace old instance states with new states
+            instance.states = states[tid];
+            let updatedInstance = await updateInstance(instanceID, instance)
+            if(updatedInstance){
+                //get display data for new state
+                let display = allTemplates[tid].machines[mid].states[currentState].role[rid].display;
+    
+                let displayData = [];
+                for (const obj of display.displayData) {
+                    for (const key in obj) {
+                        let val = obj[key];
+                        let o = {};
+                        o[key] = context[tid][lang][key][val];
+                        displayData.push(o);
+                    }
+                }
+                return res.json({status: "success", currentState: currentState, displayObject: displayData});
+            }else {
+                return res.json({status: "fail"})
+            }
         } catch (e) {
             return res.status(400).json({
                 message: e,
-                states: states,
+                states: instanceStates,
             });
         }
     })
@@ -592,10 +739,53 @@ server.use(
 // User status
 server.use(
     "/",
-    router.get("/currentUserStatus/:tid/:rid", async (req , res) => {
-        console.log("Called callAction with template=", req.params.tid, " role=", req.params.rid);
-        let currState = states[templateID][machineName].currentState;
-        return res.json({currentState: currState, displayObject: displays[currState].roles[req.params.rid]});
+    router.get("/currentUserStatus/:iid/:mid/:lang", async (req , res) => {
+        //instance id
+        let instanceID = req.params.iid;
+        //machine id
+        let mid = req.params.mid;
+        //language
+        let lang = req.params.lang;
+      
+        //get instance
+        let instance = await getInstance(instanceID);
+        //role id
+        let rid = instance.role;
+        //template id
+        let tid = instance.templateID;
+        //instance states
+        let instanceStates = instance.states;
+        //set current states object to instance's states object
+        states[tid] = instanceStates;
+
+        console.log(`
+        
+Called currentUserStatus with:
+role=${rid}
+template=${tid}
+machine=${mid}
+
+States= ${JSON.stringify(instanceStates)}
+
+`);
+
+        //get current state
+        let currentState = instanceStates[mid].currentState;
+        //get display data for current state
+        let display = allTemplates[tid].machines[mid].states[currentState].role[rid].display;
+
+        let displayData = [];
+        for (const obj of display.displayData) {
+            for (const key in obj) {
+                let val = obj[key];
+                let o = {};
+                o[key] = context[tid][lang][key][val];
+                displayData.push(o);
+            }
+        }
+        console.log("Display=", displayData)
+
+        return res.json({status: "success", currentState: currentState, displayObject: displayData});
     })
 );
 
