@@ -1,67 +1,67 @@
-const Template = require('../models/templateModel.js');
+const Context = require('../models/contextModel.js');
 
-addTemplate = (req, res) => {
+addContext = (req, res) => {
     const body = req.body
 
     if (!body) {
         return res.status(400).json({
             success: false,
-            error: 'must provide template',
+            error: 'must provide Context',
         })
     }
 
-    const template = new Template(body);
+    const context = new Context(body);
 
-    if (!template) {
+    if (!context) {
         return res.status(400).json({ success: false, error: err })
     }
 
-    template
+    context
         .save()
         .then(() => {
             return res.status(201).json({
                 success: true,
-                id: template._id,
-                message: 'Template created!',
+                id: context._id,
+                message: 'Context created!',
             })
         })
         .catch(error => {
             return res.status(400).json({
                 error,
-                message: 'Template not created!',
+                message: 'Context not created',
             })
         })
 }
 
-getTemplateById = async (req, res) => {
-    await Template.findOne({ _id: req.params.id }, (err, template) => {
+getContextById = async (req, res) => {
+    await Context.findOne({ _id: req.params.id }, (err, context) => {
         if (err) {
             return res.status(400).json({ success: false, error: err })
         }
-        if (!template) {
+        if (!context) {
             return res
                 .status(404)
-                .json({ success: false, error: `Template not found` })
+                .json({ success: false, error: `Context not found` })
         }
-        return res.status(200).json({ success: true, data: template })
+        return res.status(200).json({ success: true, data: context })
     }).catch(err => console.log(err))
 }
 
-getTemplates = async (req, res) => {
-    await Template.find({}, (err, templates) => {
+getContext = async (req, res) => {
+    await Context.find({}, (err, contexts) => {
         if (err) {
             return res.status(400).json({ success: false, error: err })
         }
-        if (!templates.length) {
+        if (!contexts.length) {
             return res
                 .status(404)
-                .json({ success: false, error: `Templates not found` })
+                .json({ success: false, error: `Contexts not found` })
         }
-        return res.status(200).json({ success: true, data: templates })
+        return res.status(200).json({ success: true, data: contexts })
     }).catch(err => console.log(err))
 }
 
-updateTemplate = async (req, res) => {
+updateContext = async (req, res) => {
     const body = req.body
 
     if (!body) {
@@ -71,40 +71,37 @@ updateTemplate = async (req, res) => {
         })
     }
 
-    Template.findOne({ _id: req.params.id }, (err, template) => {
+    Context.findOne({ _id: req.params.id }, (err, context) => {
         if (err) {
             return res.status(404).json({
                 err,
-                message: 'Template not found',
+                message: 'Context not found',
             })
         }
-        if (body.uid)
-            template.uid = body.uid
-        if (body.roles)
-            template.roles = body.roles
-        if (body.machines)
-            template.machines = body.machines
-        template
+        context.templateID = body.templateID;
+        context.languages = body.languages;
+
+        context
             .save()
             .then(() => {
                 return res.status(200).json({
                     success: true,
-                    id: template._id,
-                    message: 'Template updated',
+                    id: context._id,
+                    message: 'Context updated',
                 })
             })
             .catch(error => {
                 return res.status(404).json({
                     error,
-                    message: 'Template not updated',
+                    message: 'Context not updated',
                 })
             })
     })
 }
 
 module.exports = {
-    addTemplate,
-    getTemplates,
-    getTemplateById,
-    updateTemplate
+    addContext,
+    getContextById,
+    getContext,
+    updateContext
 }

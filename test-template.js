@@ -83,6 +83,17 @@ const pcc =   {
                                 "machine": "0",
                                 "uid": "state-ff6d12"
                             }
+                        },
+                        "p32h5f": {
+                            "displayName": "move to payment",
+                            "from": {
+                                "machine": "0",
+                                "uid": "state-c5df3d"
+                            },
+                            "to": {
+                                "machine": "0",
+                                "uid": "state-l32nb4"
+                            }
                         }
                     },
                     "role": {
@@ -104,6 +115,67 @@ const pcc =   {
                                                 {
                                                     "type": "transition",
                                                     "do": "KWSjJp"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                "action-uy4b2s": {
+                                    "displayName": "move to payment",
+                                    "action": [
+                                        {
+                                            "condition": true,
+                                            "events": [
+                                                {
+                                                    "type": "transition",
+                                                    "do": "p32h5f"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "state-l32nb4": {
+                    "displayName": "pcc_payment",
+                    "machine": "machine-3",
+                    "composite": true,
+                    "entry": [],
+                    "exit": [],
+                    "transitions": {
+                        "BB7Nmx": {
+                            "displayName": "back to pcc selection",
+                            "from": {
+                                "machine": "0",
+                                "uid": "state-c5df3d"
+                            },
+                            "to": {
+                                "machine": "0",
+                                "uid": "state-ff6d12"
+                            }
+                        }
+                    },
+                    "role": {
+                        "default-role":{
+                            "display": {
+                                "description": "title",
+                                "displayData": [
+                                    {title: 2},
+                                    {button: 2}
+                                ]
+                            },
+                            "actions": {
+                                "action-ujcJxV": {
+                                    "displayName": "find different pcc",
+                                    "action": [
+                                        {
+                                            "condition": true,
+                                            "events": [
+                                                {
+                                                    "type": "transition",
+                                                    "do": "BB7Nmx"
                                                 }
                                             ]
                                         }
@@ -350,24 +422,13 @@ const pcc =   {
                         "84ghd12": {
                           "displayName": "update terms",
                           "from": {
-                              "machine": "machine-1",
+                              "machine": "machine-2",
                               "uid": "state-j1452d3"
                           },
                           "to": {
-                              "machine": "machine-1",
+                              "machine": "machine-2",
                               "uid": "state-QSaIwW"
                           }
-                        },
-                        "84ghd12": {
-                            "displayName": "update terms",
-                            "from": {
-                                "machine": "machine-1",
-                                "uid": "state-j1452d3"
-                            },
-                            "to": {
-                                "machine": "machine-1",
-                                "uid": "state-QSaIwW"
-                            }
                         }
                     },
                     "role": {
@@ -399,14 +460,14 @@ const pcc =   {
                     }
                 },
                 "state-QSaIwW": {
-                    "displayName": "pcc_selection",
+                    "displayName": "create_contract",
                     "machine": null,
                     "composite": false,
                     "entry": [],
                     "exit": [],
                     "transitions": {
                         "4n79Bk": {
-                            "displayName": "update preferences",
+                            "displayName": "sign contract",
                             "from": {
                                 "machine": "machine-1",
                                 "uid": "state-QSaIwW"
@@ -428,21 +489,7 @@ const pcc =   {
                             },
                             "actions": {
                                 "action-QtBzeH": {
-                                    "displayName": "update preferences",
-                                    "action": [
-                                        {
-                                            "condition": true,
-                                            "events": [
-                                                {
-                                                    "type": "transition",
-                                                    "do": "4n79Bk"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                },
-                                "action-dIjcUj": {
-                                    "displayName": "select pcc",
+                                    "displayName": "sign",
                                     "action": [
                                         {
                                             "condition": true,
@@ -450,8 +497,8 @@ const pcc =   {
                                                 {
                                                     "type": "broadcast",
                                                     "do": {
-                                                      "machine": "machine-0",
-                                                      "action": "action-7a9cf8"
+                                                        "machine": "machine-0",
+                                                        "action": "action-uy4b2s"
                                                     }
                                                 }
                                             ]
@@ -462,6 +509,86 @@ const pcc =   {
                         }
                     }
                 },
+            },
+        },
+        "machine-3": {
+            "displayName": "/pcc_payment",
+            "parent": "0",
+            "default": "state-PcyRyF",
+            "concurrent": false,
+            "history": true,
+            "transitions": {},
+            "actions": {},
+            "states": {
+                "state-PcyRyF": {
+                    "displayName": "awaiting_funds",
+                    "machine": null,
+                    "composite": false,
+                    "entry": [],
+                    "exit": [],
+                    "transitions": {
+                        "uzKnXx": {
+                            "displayName": "funds received",
+                            "from": {
+                                "machine": "machine-3",
+                                "uid": "state-PcyRyF"
+                            },
+                            "to": {
+                                "machine": "machine-3",
+                                "uid": "state-j1452d3"
+                            }
+                        }
+                    },
+                    "role": {
+                        "default-role":{
+                            "display": {
+                                "description": "title",
+                                "displayData": [
+                                    {title: 3},
+                                    {button: 3}
+                                ]
+                            },
+                            "actions": {
+                                "action-MX91Uq": {
+                                "displayName": "funds received",
+                                "action": [
+                                    {
+                                        "condition": true,
+                                        "events": [
+                                            {
+                                                "type": "transition",
+                                                "do": "uzKnXx"
+                                            }
+                                        ]
+                                    }
+                                ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "state-j1452d3": {
+                    "displayName": "funded",
+                    "machine": null,
+                    "composite": false,
+                    "entry": [],
+                    "exit": [],
+                    "transitions": {
+                    },
+                    "role": {
+                        "default-role":{
+                            "display": {
+                                "description": "title",
+                                "displayData": [
+                                    {text: 4},
+                                    {button: 4}
+                                ]
+                            },
+                            "actions": {
+                            }
+                        }
+                    }
+                }
             },
         },
       }
@@ -510,10 +637,10 @@ const newTemp =   {
                             "display": {
                                 "description": "title",
                                 "displayData": [
-                                    {title: 1},
-                                    {header: 1},
-                                    {image: 1},
-                                    {button: 1}
+                                    {"title": 1},
+                                    {"header": 1},
+                                    {"image": 1},
+                                    {"button": 1}
                                 ]
                             },
                             "actions": {
@@ -559,8 +686,8 @@ const newTemp =   {
                             "display": {
                                 "description": "title",
                                 "displayData": [
-                                    {title: 2},
-                                    {button: 2}
+                                    {"title": 2},
+                                    {"button": 2}
                                 ]
                             },
                             "actions": {
@@ -634,8 +761,8 @@ const newTemp =   {
                             "display": {
                                 "description": "title",
                                 "displayData": [
-                                    {title: 3},
-                                    {button: 3}
+                                    {"title": 3},
+                                    {"button": 3}
                                 ]
                             },
                             "actions": {
@@ -681,8 +808,8 @@ const newTemp =   {
                             "display": {
                                 "description": "title",
                                 "displayData": [
-                                    {text: 4},
-                                    {button: 4}
+                                    {"text": 4},
+                                    {"button": 4}
                                 ]
                             },
                             "actions": {

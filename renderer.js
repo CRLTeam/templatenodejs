@@ -14,14 +14,12 @@ const fs = require("fs");
 // const microwave = require("./template.js");
 // const tbb = require("./tbb.js");
 // const context = require("./context.js").context;
-const tester = require("./test-template.js");
-const { setAllTemplatesDefaults, setRoles } = require('./startup.js');
+// const tester = require("./test-template.js");
+const { setAllTemplateDefaults, setRoles } = require('./startup.js');
 const doFunction = require("./functions.js").doFunction;
 const doTransition = require("./transitions.js").doTransition;
 const doBroadcast = require("./transitions.js").doBroadcast;
-const context = require("./context.js").context;
 
-const allTemplates = {};
 let templateID;
 let template;
 
@@ -54,11 +52,29 @@ let allDisplayNames = {};
  * Set template
  * @param {string} tid   template ID
  */
-function setTemplate(tid) {
+async function setTemplate(tid) {
     //uses inputted template id and sets it to the global variable templateID
     templateID = tid;
-    //sets active template object to the one associated with the templateID
-    template = allTemplates[templateID].machines;
+
+    //retrieve template from database
+    try{
+        const res = await axios({
+            method: 'get',
+            url: `${serverUrl}/api/getTemplate/${tid}`
+        }).then(response =>{
+                response = response.data.data;
+                let temp = response.machines; 
+                let roles = response.roles;
+                return {template: temp, roles: roles} 
+            });
+        template = res.template;
+        roles = res.roles;
+        return res.template;
+    }catch(err){
+        console.log ('ERROR: ', err)
+        return false;
+    }
+
 }
 
 /**
@@ -79,18 +95,18 @@ function getInput(query) {
  * @param {string}  tid     template ID, set to templateID global variable by default
  * @returns {Object} information about the request as well as the states data
  */
-function showAllStates(tid = templateID) {
-    //set current template
-    setTemplate(tid);
-    let statesReturn = JSON.stringify(states[templateID], null, 2);
-    console.log("All states \n", statesReturn);
-    return {
-        status: "success",
-        type: "request",
-        message: "States returned successfully",
-        data: statesReturn
-    };
-}
+// function showAllStates(tid = templateID) {
+//     //set current template
+//     await setTemplate(tid);
+//     let statesReturn = JSON.stringify(states[templateID], null, 2);
+//     console.log("All states \n", statesReturn);
+//     return {
+//         status: "success",
+//         type: "request",
+//         message: "States returned successfully",
+//         data: statesReturn
+//     };
+// }
 
 /**
  * Get machine object from template.
@@ -178,7 +194,7 @@ async function doAction(actionName, machineName, type, role, tid = templateID, d
     let promise = new Promise(async (resolve, reject) => {
         let response;
         templateID = tid;
-        template = allTemplates[templateID];
+        template = await setTemplate(templateID);
         let machine = getMachine(machineName, templateID);
         if (machine == undefined) {
             reject(`Machine ${machineName} does not exist`);
@@ -294,10 +310,10 @@ function allAvailableActions(tid, userRole = role) {
  * @param {string} tid          template ID
  * @returns {Array, boolean} array containing all available actions in machine, false if machine does not exist
  */
-function machineAvailableActions(machineName, tid, userRole = role) {
+async function machineAvailableActions(machineName, tid, userRole = role) {
     //set template
     templateID = tid;
-    template = allTemplates[templateID];
+    template = await setTemplate(templateID);
     //if machine does not exist, return false
     if (getMachine(machineName, templateID) == undefined) {
         return false;
@@ -311,10 +327,10 @@ function machineAvailableActions(machineName, tid, userRole = role) {
  * @param {string} tid          template ID
  * @returns {Array, boolean} array containing all available actions in machine, false if machine does not exist
  */
-function getDisplayData(machineName, tid, state, userRole = role) {
+async function getDisplayData(machineName, tid, state, userRole = role) {
     //set template 
     templateID = tid;
-    template = allTemplates[templateID];
+    template = await setTemplate(templateID);
 
     let displayState = template.machines[machineName].display[state][userRole];
     if(displayState == ""){
@@ -351,7 +367,28 @@ function getDisplayData(machineName, tid, state, userRole = role) {
     };
 }
 
-async function createInstance(tid, rid, states) {
+async function getContext(contextID) {
+    
+    try{
+        const res = await axios({
+            method: 'get',
+            url: `${serverUrl}/api/getContext/${contextID}`
+        }).then(response =>{
+                response = response.data.data;
+                let context = response
+
+                return context;
+            });
+
+        return res;
+    }catch(err){
+        console.log ('ERROR: ', err)
+        return false;
+    }
+
+}
+
+async function createInstance(tid, rid, states, context) {
 
     try{
         //create instance ID
@@ -364,7 +401,7 @@ async function createInstance(tid, rid, states) {
                 _id: instanceID,
                 templateID: tid,
                 role: rid,
-                context: tid,
+                context: context,
                 states: JSON.stringify(states)
             }
         });
@@ -399,6 +436,7 @@ async function getInstance(instanceID) {
         console.log ('ERROR: ', err)
         return false;
     }
+
 }
 
 async function updateInstance(instanceID, data) {
@@ -424,6 +462,27 @@ async function updateInstance(instanceID, data) {
     }
 }
 
+async function getTemplate(templateID) {
+    
+    try{
+        const res = await axios({
+            method: 'get',
+            url: `${serverUrl}/api/getTemplate/${templateID}`
+        }).then(response =>{
+                response = response.data.data;
+                temp = response.machines
+
+                return temp;
+            });
+
+        return res;
+    }catch(err){
+        console.log ('ERROR: ', err)
+        return false;
+    }
+
+}
+
 /**
  * Set up roles array and set user role. Set default states of active machines.
  */
@@ -446,108 +505,23 @@ async function start() {
     app.listen(apiPort, () => console.log(`Mongo server running on port ${apiPort}`))
 
     await new Promise(r => setTimeout(r, 500));
-
-    do {
-        // Get user input to set template
-        tid = await getInput("Please enter template ID: ");
-        setTemplate(tid);
-        //call function to set all default states for each template
-        setAllTemplatesDefaults();
-        setTemplate(tid);
-        if(allTemplates[templateID]){
-            template = allTemplates[templateID];
-        }
-    } while (templateID == -1);
-    //ask user to set their role
-    let roles = setRoles(templateID);
-    let userRole;
-    
-    while (true) {
-        userRole = await getInput(`Please select a role [${roles}]: `);
-        if (!roles.includes(userRole)) {
-            console.log("Invalid input");
-        } else {
-            role = userRole;
-            // if allUser object hasn't been created for this template yet, create it
-            if(!allUsers[templateID]){
-                allUsers[templateID] = {}
-            }
-            // if the role hasnt been added yet, add it
-            if(!allUsers[templateID][role]){
-                allUsers[templateID][role] = 0
-            }
-            allUsers[templateID][role]++;
-            break;
-        }
-    }
 }
 
 /**
  * Main function.
  */
 async function main() {
-    // Set up allTemplates object
-    for (const templ of tester.allTemplates) {
-        //create object for state   
-        states[templ.uid] = {};
-
-        // Add template to allTemplates
-        allTemplates[templ.uid] = templ;
-    }
 
     //set up all needed global variables and arrays
     await start();
     let input;
 
     cli: while (true) {
-        input = await getInput("Choose option [all states,action,available actions,display data,exit]: ");
+        input = await getInput("Type 'exit' to exit program\n");
         let machineName;
         let displayState;
 
         switch (input) {
-            case "all states":
-                showAllStates();
-                break;
-            case "action":
-                const inputted = await getInput(
-                    "Please enter an action, followed by a space, then the machine name:\n"
-                );
-                let actionName = inputted.split(" ")[0];
-                machineName = inputted.split(" ")[1];
-
-                try {
-                    let response = await doAction(actionName, machineName, "user", role, templateID);
-                    console.log("response ", response);
-                } catch (e) {
-                    console.log(e);
-                }
-
-                break;
-            case "available actions":
-                machineName = await getInput("Please enter a machine name or 'all': ");
-                if (machineName == "all") {
-                    let allActions = await allAvailableActions(templateID);
-                    console.log(allActions);
-                } else {
-                    let machineActions = await machineAvailableActions(machineName, templateID);
-                    if (!machineActions) {
-                        console.log(`Machine '${machineName}' does not exist`);
-                    } else if (machineActions.length != 0) {
-                        console.log(`Available actions in machine '${machineName}': ${machineActions}`);
-                    } else {
-                        console.log(`Machine '${machineName}' does not have any available actions`);
-                    }
-                }
-                break;
-            case "display data":
-                machineName = await getInput("Please enter a machine name: ");
-                displayState = await getInput("Please enter state name: ")
-                let displayData = await getDisplayData(machineName, templateID, displayState);
-                if (displayData == "") {
-                    console.log(`Machine '${machineName}' does not exist`);
-                }
-
-                break;
             case "exit":
                 break cli;
             default:
@@ -571,64 +545,14 @@ server.use(cors());
 // Express routes
 const router = express.Router();
 
-//UNUSED CALLS
-/** 
-server.use(
-    "/",
-    router.get("/show_all_states/:tid", async (req, res) => {
-        return res.json(states[req.params.tid]);
-    })
-);
-
-server.use(
-    "/",
-    router.get("/all_available_actions/:tid", async (req, res) => {
-        return res.json(allAvailableActions(req.params.tid));
-    })
-);
-
-server.use("/machine_available_actions/:tid/:mid", async (req, res) => {
-    const response = machineAvailableActions(req.params.mid, req.params.tid);
-    if (response) {
-        res.send(response);
-    } else {
-        res.statusCode(404);
-    }
-});
-
-server.use(
-    "/",
-    router.post("/perform_action/:tid", async (req, res) => {
-        const role = req.headers.role;
-        const action = req.body.action;
-        const machine = req.body.machine;
-
-        try {
-            await doAction(action, machine, "user", role, req.params.tid);
-
-            return res.json({
-                message: "Action run successfully!",
-                states: states,
-            });
-        } catch (e) {
-            return res.status(400).json({
-                message: e,
-                states: states,
-            });
-        }
-    })
-);
-**/
-
-// Express routes
-// const router = express.Router();
-
 // Create instance
+// TODO: create instance should just have the context id and role id (for now). the others will need instance id and role id
 server.use(
     "/",
-    router.get("/createInstance/:tid/:rid/:lang", async (req, res) => {
-        //template id
-        let tid = req.params.tid;
+    //router.get("/createInstance/:tid/:rid/:lang", async (req, res) => {
+    router.get("/createInstance/:cid/:rid/:lang", async (req, res) => {
+        //context id
+        let cid = req.params.cid;
         //role id
         let rid = req.params.rid;
         //language
@@ -636,27 +560,31 @@ server.use(
         console.log(`
         
 Called createInstance with:
-template=${tid}
+context=${cid}
 role=${rid}
 
-States= ${states[tid]}
-
 `);
+        //get context
+        let context = await getContext(cid);
+        tid = context.templateID;
+        context = context.languages;
+        //get template from database
+        await setAllTemplateDefaults(tid);
 
         //create instance and store instance id
-        let instanceID = await createInstance(tid, rid, states[tid]);
+        let instanceID = await createInstance(tid, rid, states[tid], cid);
         
         //get current state
         let currentState = states[tid][0].currentState;
         //get display data for current state
-        let display = allTemplates[tid].machines[0].states[currentState].role[rid].display;
+        let display = template[0].states[currentState].role[rid].display;
 
         let displayData = [];
         for (const obj of display.displayData) {
             for (const key in obj) {
                 let val = obj[key];
                 let o = {};
-                o[key] = context[tid][lang][key][val];
+                o[key] = context[lang][key][val];
                 displayData.push(o);
             }
         }
@@ -670,7 +598,7 @@ States= ${states[tid]}
 // Action call
 server.use(
     "/",
-    router.get("/callAction/:iid/:mid/:aid/:lang", async (req, res) => {
+    router.get("/callAction/:iid/:mid/:aid/:rid/:lang", async (req, res) => {
         //instance id
         let instanceID = req.params.iid;
         //machine id
@@ -684,8 +612,14 @@ server.use(
         let instance = await getInstance(instanceID);
         //role id
         let rid = instance.role;
+        if (req.params.rid != rid){
+            return res.status(401).json({
+                message: "UNAUTHORIZED ACCESS"
+            })
+        }
         //template id
         let tid = instance.templateID;
+        template = await getTemplate(tid);
         //instance states
         let instanceStates = instance.states;
         //set current states object to instance's states object
@@ -704,6 +638,9 @@ States= ${JSON.stringify(instanceStates)}
 `);
 
         try {
+            cid = instance.context;
+            let context = await getContext(cid);
+            
             let currentState = states[tid][mid].currentState;
             await doAction(aid, mid, "user", rid, tid);
             currentState = states[tid][mid].currentState;
@@ -712,14 +649,14 @@ States= ${JSON.stringify(instanceStates)}
             let updatedInstance = await updateInstance(instanceID, instance)
             if(updatedInstance){
                 //get display data for new state
-                let display = allTemplates[tid].machines[mid].states[currentState].role[rid].display;
+                let display = template[mid].states[currentState].role[rid].display;
     
                 let displayData = [];
                 for (const obj of display.displayData) {
                     for (const key in obj) {
                         let val = obj[key];
                         let o = {};
-                        o[key] = context[tid][lang][key][val];
+                        o[key] = context.languages[lang][key][val];
                         displayData.push(o);
                     }
                 }
@@ -739,7 +676,7 @@ States= ${JSON.stringify(instanceStates)}
 // User status
 server.use(
     "/",
-    router.get("/currentUserStatus/:iid/:mid/:lang", async (req , res) => {
+    router.get("/currentUserStatus/:iid/:mid/:rid/:lang", async (req , res) => {
         //instance id
         let instanceID = req.params.iid;
         //machine id
@@ -751,8 +688,14 @@ server.use(
         let instance = await getInstance(instanceID);
         //role id
         let rid = instance.role;
+        if (req.params.rid != rid){
+            return res.status(401).json({
+                message: "UNAUTHORIZED ACCESS"
+            })
+        }
         //template id
         let tid = instance.templateID;
+        template = await getTemplate(tid);
         //instance states
         let instanceStates = instance.states;
         //set current states object to instance's states object
@@ -768,18 +711,20 @@ machine=${mid}
 States= ${JSON.stringify(instanceStates)}
 
 `);
+        cid = instance.context;
+        let context = await getContext(cid);
 
         //get current state
-        let currentState = instanceStates[mid].currentState;
+        let currentState = states[tid][mid].currentState;
         //get display data for current state
-        let display = allTemplates[tid].machines[mid].states[currentState].role[rid].display;
+        let display = template[mid].states[currentState].role[rid].display;
 
         let displayData = [];
         for (const obj of display.displayData) {
             for (const key in obj) {
                 let val = obj[key];
                 let o = {};
-                o[key] = context[tid][lang][key][val];
+                o[key] = context.languages[lang][key][val];
                 displayData.push(o);
             }
         }
@@ -798,7 +743,6 @@ console.log(`Express running on port: ${port}`);
 main();
 
 //export objects
-exports.getAllTemplates = () => allTemplates;
 exports.getRole = () => role;
 exports.getStates = () => states;
 exports.setStates = s => {states = s};

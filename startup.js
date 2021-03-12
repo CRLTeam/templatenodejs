@@ -6,14 +6,12 @@ let template;
 let templateID;
 let states;
 let allDisplayNames;
-let allTemplates;
 
 function setVariables() {
     templateID = render.getTemplateID();
     template = render.getTemplate();
     states = render.getStates();
     allDisplayNames = render.getAllDisplayNames();
-    allTemplates = render.getAllTemplates();
 }
 
 function updateVariables() {
@@ -42,14 +40,14 @@ function setRoles(tid) {
 /**
  * Goes through each template and sets up states context object
  */
-async function setAllTemplatesDefaults() {
+async function setAllTemplateDefaults(tid) {
     setVariables();
-    for (let tid in allTemplates) {
-        //create object for template in allDisplayNames object
-        allDisplayNames[tid] = {};
-        //call setDefaults for the template
-        await setDefaults(0, true, null, tid);
-    }
+    template = await render.setTemplate(tid)
+    //create object for template in allDisplayNames object
+    allDisplayNames[tid] = {};
+    states[tid] = {}
+    //call setDefaults for the template
+    setDefaults(0, true, null, tid);
 }
 
 /**
@@ -61,7 +59,13 @@ async function setAllTemplatesDefaults() {
  */
 //function called at startup that sets all defaults of active machines
 function setDefaults(uid, active, stateUID, tid) {  
-    // render.setTemplate(tid)
+    console.log('uid', uid)
+    console.log('active', active)
+    console.log('stateUID', stateUID)
+    console.log('tid', tid)
+    console.log('states', states)
+    console.log('template', template)
+    render.setTemplate(tid)
     states[tid][uid] = {};
     //set concurrent true or false in states object
     states[tid][uid].concurrent = template[uid].concurrent;
@@ -131,5 +135,5 @@ function setDefaults(uid, active, stateUID, tid) {
 
 module.exports = {
     setRoles: setRoles,
-    setAllTemplatesDefaults: setAllTemplatesDefaults
+    setAllTemplateDefaults: setAllTemplateDefaults
 }

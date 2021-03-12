@@ -13,23 +13,3 @@ const Instance = new Schema(
 )
 
 module.exports = mongoose.model('instance', Instance)
-
-/*
-{
-    "templateID": "newTemp",
-    "role": "default-role",
-    "context": "newTemp",
-    "states": {
-      "0": {
-        "concurrent": false,
-        "displayName": "/",
-        "currentState": "state-ff6d12"
-      },
-      "machine-1": {
-        "concurrent": false,
-        "displayName": "/first",
-        "currentState": null
-      }
-    }
-  }
-  */
