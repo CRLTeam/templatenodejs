@@ -518,8 +518,6 @@ async function main() {
 
     cli: while (true) {
         input = await getInput("Type 'exit' to exit program\n");
-        let machineName;
-        let displayState;
 
         switch (input) {
             case "exit":

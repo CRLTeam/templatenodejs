@@ -944,8 +944,8 @@ const newTemp =   {
                                 "display": {
                                     "description": "title",
                                     "displayData": [
-                                        {title: 0},
-                                        {menu: 1}
+                                        {"title": 0},
+                                        {"menu": 1}
                                     ]
                                 },
                                 "actions": {
@@ -1075,9 +1075,9 @@ const newTemp =   {
                                 "display": {
                                     "description": "image",
                                     "displayData": [
-                                        {title: 1},
-                                        {image: 1},
-                                        {button: 1}
+                                        {"title": 1},
+                                        {"image": 1},
+                                        {"button": 1}
                                     ]
                                 },
                                 "actions": {
@@ -1123,9 +1123,9 @@ const newTemp =   {
                                 "display": {
                                     "description": "video",
                                     "displayData": [
-                                        {title: 2},
-                                        {video: 1},
-                                        {button: 1}
+                                        {"title": 2},
+                                        {"video": 1},
+                                        {"button": 1}
                                     ]
                                 },
                                 "actions": {
@@ -1171,9 +1171,9 @@ const newTemp =   {
                                 "display": {
                                     "description": "radio",
                                     "displayData": [
-                                        {title: 3},
-                                        {radioButtonList: 1},
-                                        {button: 1}
+                                        {"title": 3},
+                                        {"radioButtonList": 1},
+                                        {"button": 1}
                                     ]
                                 },
                                 "actions": {
@@ -1219,9 +1219,9 @@ const newTemp =   {
                                 "display": {
                                     "description": "checkbox",
                                     "displayData": [
-                                        {title: 4},
-                                        {checkBoxList: 1},
-                                        {button: 1}
+                                        {"title": 4},
+                                        {"checkBoxList": 1},
+                                        {"button": 1}
                                     ]
                                 },
                                 "actions": {
@@ -1267,9 +1267,9 @@ const newTemp =   {
                                 "display": {
                                     "description": "dropdown",
                                     "displayData": [
-                                        {title: 5},
-                                        {dropDownSelect: 1},
-                                        {button: 1}
+                                        {"title": 5},
+                                        {"dropDownSelect": 1},
+                                        {"button": 1}
                                     ]
                                 },
                                 "actions": {
@@ -1315,10 +1315,10 @@ const newTemp =   {
                                 "display": {
                                     "description": "textbox",
                                     "displayData": [
-                                        {title: 6},
-                                        {shortTextInput: 1},
-                                        {paragraphInput: 1},
-                                        {button: 1}
+                                        {"title": 6},
+                                        {"shortTextInput": 1},
+                                        {"paragraphInput": 1},
+                                        {"button": 1}
                                     ]
                                 },
                                 "actions": {
@@ -1364,10 +1364,10 @@ const newTemp =   {
                                 "display": {
                                     "description": "date and time",
                                     "displayData": [
-                                        {title: 7},
-                                        {dateInput: 1},
-                                        {timeInput: 1},
-                                        {button: 1}
+                                        {"title": 7},
+                                        {"dateInput": 1},
+                                        {"timeInput": 1},
+                                        {"button": 1}
                                     ]
                                 },
                                 "actions": {
@@ -1388,8 +1388,8 @@ const newTemp =   {
                                 }
                             }
                         }
-                    },
-                },
+                    }
+                }
             }
           }
         }
