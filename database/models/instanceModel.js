@@ -6,8 +6,9 @@ const Instance = new Schema(
         _id: { type: String, required: true},
         templateID: { type: String, required: true },
         context: { type: String, required: true },
-        states: { type: String, required: true },
-        role: String
+        states: { type: Object, required: true },
+        role: {type: String, required: false},
+        extraData: {type: Object, required: true}
     },
     { timestamps: true },
 )

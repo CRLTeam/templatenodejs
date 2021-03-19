@@ -158,7 +158,9 @@ async function doEvents(events, machineName, data) {
             responseArr.push(broadcast);
         } else if (e.type == "function") {
             //send data when calling function
-            let func = await doFunction(e.do, data);
+            console.log('EEE do', e.do)
+            console.log(' DATAAA', data)
+            let func = await doFunction(e.do, data, e.funcData);
             responseArr.push(func);
         } else if (e.type == "action") {
             //actions calling other actions will have special type 'eventCall'
@@ -192,6 +194,7 @@ function getCurrState(machine, tid) {
  */
 async function doAction(actionName, machineName, type, role, tid = templateID, data) {
     let promise = new Promise(async (resolve, reject) => {
+
         let response;
         templateID = tid;
         template = await setTemplate(templateID);
@@ -237,7 +240,6 @@ async function doAction(actionName, machineName, type, role, tid = templateID, d
                     let funcArgs = {func: event.condition[idx].func,
                                     args: event.condition[idx].args}
                     let checkCon = await doFunction(funcArgs);
-                    //console.log('check CONDITION??!@?!?@!?$!?$ ', checkCon)
                     if (checkCon) {
                         response = await doEvents(event.events, machineName, data);
                         resolve(response);
@@ -402,7 +404,8 @@ async function createInstance(tid, rid, states, context) {
                 templateID: tid,
                 role: rid,
                 context: context,
-                states: JSON.stringify(states)
+                states: states,
+                extraData: {"contextID": context}
             }
         });
 
@@ -425,7 +428,8 @@ async function getInstance(instanceID) {
                     templateID: response.templateID,
                     role: response.role,
                     context: response.context,
-                    states: JSON.parse(response.states)
+                    states: response.states,
+                    extraData: response.extraData
                     };
 
                 return instance;
@@ -450,7 +454,8 @@ async function updateInstance(instanceID, data) {
                 templateID: data.templateID,
                 role: data.role,
                 context: data.context,
-                states: JSON.stringify(data.states)
+                states: data.states,
+                extraData: data.extraData
             }
         });
         
@@ -547,7 +552,6 @@ const router = express.Router();
 // TODO: create instance should just have the context id and role id (for now). the others will need instance id and role id
 server.use(
     "/",
-    //router.get("/createInstance/:tid/:rid/:lang", async (req, res) => {
     router.get("/createInstance/:cid/:rid/:lang", async (req, res) => {
         //context id
         let cid = req.params.cid;
@@ -596,7 +600,8 @@ role=${rid}
 // Action call
 server.use(
     "/",
-    router.get("/callAction/:iid/:mid/:aid/:rid/:lang", async (req, res) => {
+    router.get("/callAction/:iid/:mid/:aid/:rid/:lang/:data", async (req, res) => {
+        console.log('REQ ', req)
         //instance id
         let instanceID = req.params.iid;
         //machine id
@@ -605,6 +610,9 @@ server.use(
         let aid = req.params.aid;
         //language
         let lang = req.params.lang;
+
+        // TODO: TEMPORARY
+        let data = req.params.data;
         
         //get instance
         let instance = await getInstance(instanceID);
@@ -640,7 +648,10 @@ States= ${JSON.stringify(instanceStates)}
             let context = await getContext(cid);
             
             let currentState = states[tid][mid].currentState;
-            await doAction(aid, mid, "user", rid, tid);
+            //temporarily mimicing data
+            data = {wow: data}
+            data.instanceID = instanceID;
+            await doAction(aid, mid, "user", rid, tid, data);
             currentState = states[tid][mid].currentState;
             //replace old instance states with new states
             instance.states = states[tid];

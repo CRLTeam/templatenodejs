@@ -78,12 +78,16 @@ updateInstance = async (req, res) => {
                 message: 'instance not found',
             })
         }
-        instance.templateID = body.templateID;
-        instance.context = body.context;
-        instance.states = body.states;
-        if(body.role){
+        if(body.templateID)
+            instance.templateID = body.templateID;
+        if(body.context)
+            instance.context = body.context;
+        if(body.states)
+            instance.states = body.states;
+        if(body.role)
             instance.role = body.role;
-        }
+        if(body.extraData)
+            instance.extraData = body.extraData
 
         instance
             .save()

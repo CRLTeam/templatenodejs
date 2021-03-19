@@ -6,11 +6,10 @@ const logFileName = "renderer-" + Date.now() + "-log.txt";
 let template;
 let templateID;
 let states;
-let allDisplayNames;
-let allTemplates;
+//let allDisplayNames;
 
 const axios = require('axios');
-const url = 'http://localhost:3001';
+const serverUrl = 'http://localhost:3001';
 
 // axios({
 //     method: 'post',
@@ -25,8 +24,7 @@ function setVariables() {
     templateID = render.getTemplateID();
     template = render.getTemplate();
     states = render.getStates();
-    allDisplayNames = render.getAllDisplayNames();
-    allTemplates = render.getAllTemplates();
+    //allDisplayNames = render.getAllDisplayNames();
 }
 
 function updateVariables() {
@@ -36,95 +34,101 @@ function updateVariables() {
 
 /**
  * Calls function from action.
- * @param {Object} obj      name of function and args
- * @param {string} data     data
+ * @param {Object} func      name of function
+ * @param {Object} data     data
  */
-async function doFunction(obj, data) {
+async function doFunction(func, data, funcData) {
     setVariables();
-    let func = obj.func;
-    let args = obj.args;
+    console.log('data')
     let response;
+    let instanceID = data.instanceID;
+    delete data.instanceID;
+    console.log('instancve id ', instanceID)
 
     // split arguments into variables for every function type
     if(func == 'setData'){
-        let argsArr = args.split(",");
-        let name = argsArr[0].trim();
-        let info = argsArr[1].trim();
-
-        response = runFunction['setData'](templateID, name, info);
+        response = await runFunction['setData'](instanceID, data);
+        return response; 
     }else if(func == 'getData'){
         let argsArr = args.split(",");
         let name = argsArr[0].trim();
 
         response = runFunction['getData'](templateID, name);
-    }else if(func == 'machineInState'){
-        let argsArr = args.split(",");
-        let checkMachine = argsArr[0].trim();
-        let checkState = argsArr[1].trim();
-
-        response = runFunction['machineInState'](templateID, checkMachine, checkState);
-    }else if(func == 'incrementData'){
-        let argsArr = args.split(",");
-        let name = argsArr[0].trim();
-
-        response = runFunction['incrementData'](templateID, name);
-    }else if(func == 'decrementData'){
-        let argsArr = args.split(",");
-        let name = argsArr[0].trim();
-
-        response = runFunction['decrementData'](templateID, name);
-    }else if(func == 'roleCount'){
-        let argsArr = args.split(",");
-        let checkRole = argsArr[0].trim();
-        let comparisonType;
-        let operator = argsArr[1].trim();
-        let comparator = argsArr[2].trim();
-
-        if(isNaN(comparator)){
-            comparisonType = "data";
-        }else{
-            comparisonType = "number";
-        }
-
-        response = runFunction['roleCount'](templateID, checkRole, comparisonType, operator, comparator);
-    }else if(func == 'percentOfData'){
-        let argsArr = args.split(",");
-        let comparand = argsArr[0].trim();
-        let percentage = argsArr[1].trim();
-        let operator = argsArr[2].trim();
-        let comparator = argsArr[3].trim();
-        let comparisonType;
-
-        if(isNaN(comparator)){
-            comparisonType = "data";
-        }else{
-            comparisonType = "number";
-        }
-
-        response = runFunction['percentOfData'](templateID, comparand, percentage, operator, comparator);
-    }else if(func == 'compareData'){
-        let argsArr = args.split(",");
-        let comparand = argsArr[0].trim();
-        let operator = argsArr[1].trim();
-        let comparator = argsArr[2].trim();
-
-        response = runFunction['compareData'](templateID, comparand, operator, comparator);
-    }else if(func == 'evaluateData'){
-        let argsArr = args.split(",");
-        let data = argsArr[0].trim();
-        let operator = argsArr[1].trim();
-        let comparator = argsArr[2].trim();
-
-        response = runFunction['evaluateData'](templateID, data, operator, comparator);
+        return response;
     }
-    else if(func == 'vote'){
-        let argsArr = args.split(",");
-        let 
+    // else if(func == 'machineInState'){
+    //     let argsArr = args.split(",");
+    //     let checkMachine = argsArr[0].trim();
+    //     let checkState = argsArr[1].trim();
 
-        //response = runFunction['evaluateData'](templateID, )
-    }
+    //     response = runFunction['machineInState'](templateID, checkMachine, checkState);
+    //     return response;
+    // }else if(func == 'incrementData'){
+    //     let argsArr = args.split(",");
+    //     let name = argsArr[0].trim();
 
-    return response;
+    //     response = runFunction['incrementData'](templateID, name);
+    //     return response;
+    // }else if(func == 'decrementData'){
+    //     let argsArr = args.split(",");
+    //     let name = argsArr[0].trim();
+
+    //     response = runFunction['decrementData'](templateID, name);
+    //     return response;
+    // }else if(func == 'roleCount'){
+    //     let argsArr = args.split(",");
+    //     let checkRole = argsArr[0].trim();
+    //     let comparisonType;
+    //     let operator = argsArr[1].trim();
+    //     let comparator = argsArr[2].trim();
+
+    //     if(isNaN(comparator)){
+    //         comparisonType = "data";
+    //     }else{
+    //         comparisonType = "number";
+    //     }
+
+    //     response = runFunction['roleCount'](templateID, checkRole, comparisonType, operator, comparator);
+    //     return response;
+    // }else if(func == 'percentOfData'){
+    //     let argsArr = args.split(",");
+    //     let comparand = argsArr[0].trim();
+    //     let percentage = argsArr[1].trim();
+    //     let operator = argsArr[2].trim();
+    //     let comparator = argsArr[3].trim();
+    //     let comparisonType;
+
+    //     if(isNaN(comparator)){
+    //         comparisonType = "data";
+    //     }else{
+    //         comparisonType = "number";
+    //     }
+
+    //     response = runFunction['percentOfData'](templateID, comparand, percentage, operator, comparator);
+    //     return response;
+    // }else if(func == 'compareData'){
+    //     let argsArr = args.split(",");
+    //     let comparand = argsArr[0].trim();
+    //     let operator = argsArr[1].trim();
+    //     let comparator = argsArr[2].trim();
+
+    //     response = runFunction['compareData'](templateID, comparand, operator, comparator);
+    //     return response;
+    // }else if(func == 'evaluateData'){
+    //     let argsArr = args.split(",");
+    //     let data = argsArr[0].trim();
+    //     let operator = argsArr[1].trim();
+    //     let comparator = argsArr[2].trim();
+
+    //     response = runFunction['evaluateData'](templateID, data, operator, comparator);
+    //     return response;
+    // }
+    // else if(func == 'vote'){
+    //     let argsArr = args.split(",");
+    //     let 
+
+    //     //return response = runFunction['evaluateData'](templateID, )
+    // }
 }
 
 //temporary data storage
@@ -140,24 +144,37 @@ let allData = {
 let runFunction = {
     /**
      * Will store data in the context database.
-     * @param {string} tid   template ID
+     * @param {string} instance   instance ID
      * @param {Object} data  data
      * @param {string} name  name of property in the context database
      * @param {Object} info  data to be stored
      * @returns {Object}     information about the request and newly stored data
      */
-    setData: function (tid, name, info) {
-        allData[tid][name] = info;
-        return {
-            status: "success",
-            type: "store data",
-            message: `Info successfully added to template ${tid} for item '${name}'`,
-            data: allData[tid][name],
-            // display: [
-            //     {text: context[templateID].text[6]},
-            //     {button: context[templateID].button[1]}
-            // ]
-        };
+    setData: async function (instanceID, data) {
+        console.log('DATAATATATATATA', data)
+
+        const extra = await axios({
+            method: 'get',
+            url: `${serverUrl}/api/getInstance/${instanceID}`
+        }).then(response =>{
+                extraData = response.data.data.extraData;
+                // console.log('EXTRA DATA ', extraData)
+                return extraData
+            });
+        
+        for (element in data) {
+            console.log('element', element)
+            extra[element] = data[element]
+        }
+
+        await axios({
+            method: 'put',
+            url: `${serverUrl}/api/updateInstance/${instanceID}`,
+            data: {
+                extraData: extra
+            }
+        });
+
     },
 
     /**
@@ -166,7 +183,7 @@ let runFunction = {
      * @param {string} name  name of property in the context database
      * @returns {Object}     information about the request and requested data
      */
-    getData: function (tid, name) {
+    getData: function (instanceID, name) {
         //if the property doesn't exist in the template, return failed request
         if (!allData[tid][name]) {
             console.log(`Item ${name} does NOT exist in template ${tid}`);
