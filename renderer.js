@@ -147,6 +147,7 @@ function actionExists(action, machine, role, tid = templateID) {
  */
 async function doEvents(events, machineName, data) {
     let responseArr = [];
+    let dataArr;
     let x = 0;
     //loop through each event, check type, and execute it
     for (e of events) {
@@ -160,14 +161,17 @@ async function doEvents(events, machineName, data) {
         } else if (e.type == "function") {
             //send data when calling function
             let func = await doFunction(e.do, data, e.funcData);
-            responseArr.push(func);
+            dataArr = func;
         } else if (e.type == "action") {
             //actions calling other actions will have special type 'eventCall'
             let act = doAction(e.do, machineName, "eventCall", role);
             responseArr.push(act);
         }
     }
-    return responseArr;
+    return {
+        responses: responseArr,
+        data: dataArr
+    };
 }
 
 /**
@@ -193,7 +197,6 @@ function getCurrState(machine, tid) {
  */
 async function doAction(actionName, machineName, type, role, tid = templateID, data) {
     let promise = new Promise(async (resolve, reject) => {
-
         let response;
         templateID = tid;
         template = await setTemplate(templateID);
@@ -225,7 +228,7 @@ async function doAction(actionName, machineName, type, role, tid = templateID, d
                 return;
             }
         }
-
+        
         //find first action that has condition that is met and execute it's events
         for (const event of events) {
             //if condition is true boolean, do event
@@ -651,7 +654,8 @@ States= ${JSON.stringify(instanceStates)}
             let currentState = states[tid][mid].currentState;
             //add instance id to the data
             data.instanceID = instanceID;
-            await doAction(aid, mid, "user", rid, tid, data);
+            let response = await doAction(aid, mid, "user", rid, tid, data);
+            console.log('response ', response)
             //after doing action, update instance object in case of any changes
             instance = await getInstance(instanceID);
             currentState = states[tid][mid].currentState;
@@ -672,7 +676,7 @@ States= ${JSON.stringify(instanceStates)}
                         displayData.push(o);
                     }
                 }
-                return res.json({status: "success", currentState: currentState, displayObject: displayData});
+                return res.json({status: "success", currentState: currentState, displayObject: displayData, data: response.data});
             }else {
                 return res.json({status: "fail"})
             }

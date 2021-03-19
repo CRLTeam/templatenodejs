@@ -49,11 +49,16 @@ async function doFunction(func, data, funcData) {
         return response; 
     }else if(func == 'getData'){
 
-        response = runFunction['getData'](instanceID);
+        response = await runFunction['getData'](instanceID);
+        response = response.extraData;
 
-        //get the funcdata extra dataz
+        let extraData = {};
+        //get the funcdata extra data
+        for (data of funcData){
+            extraData[data] = response[data];
+        }
 
-        return response;
+        return extraData;
     }
     // else if(func == 'machineInState'){
     //     let argsArr = args.split(",");
