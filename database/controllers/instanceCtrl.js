@@ -78,6 +78,7 @@ updateInstance = async (req, res) => {
                 message: 'instance not found',
             })
         }
+
         if(body.templateID)
             instance.templateID = body.templateID;
         if(body.context)

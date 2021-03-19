@@ -152,14 +152,13 @@ async function doEvents(events, machineName, data) {
     for (e of events) {
         if (e.type == "transition") {
             let transition = await doTransition(machineName, e.do);
+            
             responseArr.push(transition);
         } else if (e.type == "broadcast") {
             let broadcast = await doBroadcast(e.do);
             responseArr.push(broadcast);
         } else if (e.type == "function") {
             //send data when calling function
-            console.log('EEE do', e.do)
-            console.log(' DATAAA', data)
             let func = await doFunction(e.do, data, e.funcData);
             responseArr.push(func);
         } else if (e.type == "action") {
@@ -600,8 +599,8 @@ role=${rid}
 // Action call
 server.use(
     "/",
-    router.get("/callAction/:iid/:mid/:aid/:rid/:lang/:data", async (req, res) => {
-        console.log('REQ ', req)
+    router.get("/callAction/:iid/:mid/:aid/:rid/:lang", async (req, res) => {
+        console.log('REQ ', req.body)
         //instance id
         let instanceID = req.params.iid;
         //machine id
@@ -610,10 +609,12 @@ server.use(
         let aid = req.params.aid;
         //language
         let lang = req.params.lang;
+        //data
+        let data = {};
+        if(req.body.data){
+            data = req.body.data;
+        }
 
-        // TODO: TEMPORARY
-        let data = req.params.data;
-        
         //get instance
         let instance = await getInstance(instanceID);
         //role id
@@ -648,13 +649,15 @@ States= ${JSON.stringify(instanceStates)}
             let context = await getContext(cid);
             
             let currentState = states[tid][mid].currentState;
-            //temporarily mimicing data
-            data = {wow: data}
+            //add instance id to the data
             data.instanceID = instanceID;
             await doAction(aid, mid, "user", rid, tid, data);
+            //after doing action, update instance object in case of any changes
+            instance = await getInstance(instanceID);
             currentState = states[tid][mid].currentState;
             //replace old instance states with new states
             instance.states = states[tid];
+
             let updatedInstance = await updateInstance(instanceID, instance)
             if(updatedInstance){
                 //get display data for new state

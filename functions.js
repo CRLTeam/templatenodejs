@@ -39,21 +39,20 @@ function updateVariables() {
  */
 async function doFunction(func, data, funcData) {
     setVariables();
-    console.log('data')
     let response;
     let instanceID = data.instanceID;
     delete data.instanceID;
-    console.log('instancve id ', instanceID)
 
     // split arguments into variables for every function type
     if(func == 'setData'){
-        response = await runFunction['setData'](instanceID, data);
+        response = await runFunction['setData'](instanceID, data, funcData);
         return response; 
     }else if(func == 'getData'){
-        let argsArr = args.split(",");
-        let name = argsArr[0].trim();
 
-        response = runFunction['getData'](templateID, name);
+        response = runFunction['getData'](instanceID);
+
+        //get the funcdata extra dataz
+
         return response;
     }
     // else if(func == 'machineInState'){
@@ -150,30 +149,29 @@ let runFunction = {
      * @param {Object} info  data to be stored
      * @returns {Object}     information about the request and newly stored data
      */
-    setData: async function (instanceID, data) {
-        console.log('DATAATATATATATA', data)
+    setData: async function (instanceID, data, funcData) {
 
-        const extra = await axios({
-            method: 'get',
-            url: `${serverUrl}/api/getInstance/${instanceID}`
-        }).then(response =>{
-                extraData = response.data.data.extraData;
-                // console.log('EXTRA DATA ', extraData)
-                return extraData
-            });
-        
-        for (element in data) {
-            console.log('element', element)
+        const resp = await runFunction['getData'](instanceID);
+        let extra = resp.extraData
+            
+        // go through funcData and add all the data values that have key from funcData 
+        for (element of funcData) {
             extra[element] = data[element]
         }
 
-        await axios({
+        let res = await axios({
             method: 'put',
             url: `${serverUrl}/api/updateInstance/${instanceID}`,
             data: {
+                templateID: resp.templateID,
+                role: resp.role,
+                context: resp.context,
+                states: resp.states,
                 extraData: extra
             }
         });
+
+        return res.status;
 
     },
 
@@ -183,35 +181,15 @@ let runFunction = {
      * @param {string} name  name of property in the context database
      * @returns {Object}     information about the request and requested data
      */
-    getData: function (instanceID, name) {
-        //if the property doesn't exist in the template, return failed request
-        if (!allData[tid][name]) {
-            console.log(`Item ${name} does NOT exist in template ${tid}`);
-            return {
-                status: "fail",
-                type: "data request",
-                message: `Item ${name} does NOT exist in template ${tid}`,
-                data: allData[tid][name],
-                // display: [
-                //     {text: context[templateID].text[7]},
-                //     {button: context[templateID].button[1]}
-                // ]
-            };
-        } else {
-            console.log(`Item ${name} in template ${tid}: 
-    ${allData[tid][name]}`);
-            return {
-                status: "success",
-                type: "data request",
-                message: "get data request complete",
-                data: allData[tid][name],
-                // display: [
-                //     {text: context[templateID].text[8]},
-                //     {data: allData[tid][name]},
-                //     {button: context[templateID].button[1]}
-                // ]
-            };
-        }
+    getData: async function (instanceID) {
+
+        const resp = await axios({
+            method: 'get',
+            url: `${serverUrl}/api/getInstance/${instanceID}`
+        }).then(response =>{
+                return response.data.data;
+            });
+        return resp
     },
 
     /**
