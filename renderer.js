@@ -676,6 +676,7 @@ States= ${JSON.stringify(instanceStates)}
                         displayData.push(o);
                     }
                 }
+                // console.log(' response ', {status: "success", currentState: currentState, displayObject: displayData, data: response.data})
                 return res.json({status: "success", currentState: currentState, displayObject: displayData, data: response.data});
             }else {
                 return res.json({status: "fail"})
