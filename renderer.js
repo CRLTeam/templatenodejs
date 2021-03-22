@@ -599,10 +599,192 @@ role=${rid}
     })
 );
 
-// Action call
+// Get action call
 server.use(
     "/",
-    router.get("/callAction/:iid/:mid/:aid/:rid/:lang", async (req, res) => {
+    router.get("/callGetAction/:iid/:mid/:aid/:rid/:lang", async (req, res) => {
+        console.log('REQ ', req.body)
+        //instance id
+        let instanceID = req.params.iid;
+        //machine id
+        let mid = req.params.mid;
+        //action id
+        let aid = req.params.aid;
+        //language
+        let lang = req.params.lang;
+        //data
+        let data = {};
+        if(req.body.data){
+            data = req.body.data;
+        }
+
+        //get instance
+        let instance = await getInstance(instanceID);
+        //role id
+        let rid = instance.role;
+        if (req.params.rid != rid){
+            return res.status(401).json({
+                message: "UNAUTHORIZED ACCESS"
+            })
+        }
+        //template id
+        let tid = instance.templateID;
+        template = await getTemplate(tid);
+        //instance states
+        let instanceStates = instance.states;
+        //set current states object to instance's states object
+        states[tid] = instanceStates;
+
+        console.log(`
+        
+Called callAction with:
+role= ${rid}
+template= ${tid}
+machine= ${mid}
+action= ${aid}
+
+States= ${JSON.stringify(instanceStates)}
+
+`);
+
+        try {
+            cid = instance.context;
+            let context = await getContext(cid);
+            
+            let currentState = states[tid][mid].currentState;
+            //add instance id to the data
+            data.instanceID = instanceID;
+            let response = await doAction(aid, mid, "user", rid, tid, data);
+            console.log('response ', response)
+            //after doing action, update instance object in case of any changes
+            instance = await getInstance(instanceID);
+            currentState = states[tid][mid].currentState;
+            //replace old instance states with new states
+            instance.states = states[tid];
+
+            let updatedInstance = await updateInstance(instanceID, instance)
+            if(updatedInstance){
+                //get display data for new state
+                let display = template[mid].states[currentState].role[rid].display;
+    
+                let displayData = [];
+                for (const obj of display.displayData) {
+                    for (const key in obj) {
+                        let val = obj[key];
+                        let o = {};
+                        o[key] = context.languages[lang][key][val];
+                        displayData.push(o);
+                    }
+                }
+                // console.log(' response ', {status: "success", currentState: currentState, displayObject: displayData, data: response.data})
+                return res.json({status: "success", currentState: currentState, displayObject: displayData, data: response.data});
+            }else {
+                return res.json({status: "fail"})
+            }
+        } catch (e) {
+            return res.status(400).json({
+                message: e,
+                states: instanceStates,
+            });
+        }
+    })
+);
+
+// Put action call
+server.use(
+    "/",
+    router.put("/callPutAction/:iid/:mid/:aid/:rid/:lang", async (req, res) => {
+        console.log('REQ ', req.body)
+        //instance id
+        let instanceID = req.params.iid;
+        //machine id
+        let mid = req.params.mid;
+        //action id
+        let aid = req.params.aid;
+        //language
+        let lang = req.params.lang;
+        //data
+        let data = {};
+        if(req.body.data){
+            data = req.body.data;
+        }
+
+        //get instance
+        let instance = await getInstance(instanceID);
+        //role id
+        let rid = instance.role;
+        if (req.params.rid != rid){
+            return res.status(401).json({
+                message: "UNAUTHORIZED ACCESS"
+            })
+        }
+        //template id
+        let tid = instance.templateID;
+        template = await getTemplate(tid);
+        //instance states
+        let instanceStates = instance.states;
+        //set current states object to instance's states object
+        states[tid] = instanceStates;
+
+        console.log(`
+        
+Called callAction with:
+role= ${rid}
+template= ${tid}
+machine= ${mid}
+action= ${aid}
+
+States= ${JSON.stringify(instanceStates)}
+
+`);
+
+        try {
+            cid = instance.context;
+            let context = await getContext(cid);
+            
+            let currentState = states[tid][mid].currentState;
+            //add instance id to the data
+            data.instanceID = instanceID;
+            let response = await doAction(aid, mid, "user", rid, tid, data);
+            console.log('response ', response)
+            //after doing action, update instance object in case of any changes
+            instance = await getInstance(instanceID);
+            currentState = states[tid][mid].currentState;
+            //replace old instance states with new states
+            instance.states = states[tid];
+
+            let updatedInstance = await updateInstance(instanceID, instance)
+            if(updatedInstance){
+                //get display data for new state
+                let display = template[mid].states[currentState].role[rid].display;
+    
+                let displayData = [];
+                for (const obj of display.displayData) {
+                    for (const key in obj) {
+                        let val = obj[key];
+                        let o = {};
+                        o[key] = context.languages[lang][key][val];
+                        displayData.push(o);
+                    }
+                }
+                // console.log(' response ', {status: "success", currentState: currentState, displayObject: displayData, data: response.data})
+                return res.json({status: "success", currentState: currentState, displayObject: displayData, data: response.data});
+            }else {
+                return res.json({status: "fail"})
+            }
+        } catch (e) {
+            return res.status(400).json({
+                message: e,
+                states: instanceStates,
+            });
+        }
+    })
+);
+
+// Post action call
+server.use(
+    "/",
+    router.post("/callPostAction/:iid/:mid/:aid/:rid/:lang", async (req, res) => {
         console.log('REQ ', req.body)
         //instance id
         let instanceID = req.params.iid;
