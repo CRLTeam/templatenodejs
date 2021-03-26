@@ -59,6 +59,11 @@ async function doFunction(func, data, funcData) {
         }
 
         return extraData;
+    }else if(func == 'sendEmail'){
+        //console.log('DATA IN SENDEMAIL', data)
+        let emails = data.emails;
+        let message = data.message;
+        response = await runFunction['sendEmail'](emails, message)
     }
     // else if(func == 'machineInState'){
     //     let argsArr = args.split(",");
@@ -147,7 +152,7 @@ let allData = {
 //function object that contains all the functions that the user can call from actions
 let runFunction = {
     /**
-     * Will store data in the context database.
+     * Will store data in the database.
      * @param {string} instance   instance ID
      * @param {Object} data  data
      * @param {string} name  name of property in the context database
@@ -181,7 +186,7 @@ let runFunction = {
     },
 
     /**
-     * Will get data from the context database.
+     * Will get data from the database.
      * @param {string} tid   template ID
      * @param {string} name  name of property in the context database
      * @returns {Object}     information about the request and requested data
@@ -195,6 +200,50 @@ let runFunction = {
                 return response.data.data;
             });
         return resp
+    },
+
+    /**
+     * Send email
+     * @param   {Array}   emails    list of recipient email addresses
+     * @param   {string}  message   email message
+     * @returns {Object}            information about the request and requested data
+     */
+     sendEmail: async function (emails, message) {
+
+        console.log('emails', emails[0])
+        console.log('meSSAGE', message)
+        let emailMsg = `
+
+`
+
+        const options = {
+            method: 'POST',
+            url: 'https://rapidprod-sendgrid-v1.p.rapidapi.com/mail/send',
+            headers: {
+            'content-type': 'application/json',
+            'x-rapidapi-key': '8a3062cd37msh8bba38cd45cedcap12feb0jsnf12fecc48bb2',
+            'x-rapidapi-host': 'rapidprod-sendgrid-v1.p.rapidapi.com'
+            },
+            data: {
+            personalizations: [{to: [{email: `${emails[0]}`}], subject: 'Hello, World!'}],
+            from: {email: 'from_address@example.com'},
+            content: [{type: 'text/plain', value: 'Hello, World!'}]
+            }
+        };
+        
+        await axios.request(options).then(function (response) {
+            console.log(response.data);
+        }).catch(function (error) {
+            console.error(error);
+        });
+
+        // const resp = await axios({
+        //     method: 'get',
+        //     url: `${serverUrl}/api/getInstance/${instanceID}`
+        // }).then(response =>{
+        //         return response.data.data;
+        //     });
+        // return resp
     },
 
     /**

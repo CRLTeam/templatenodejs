@@ -672,7 +672,16 @@ States= ${JSON.stringify(instanceStates)}
                     for (const key in obj) {
                         let val = obj[key];
                         let o = {};
-                        o[key] = context.languages[lang][key][val];
+                        console.log('key', key)
+                        console.log('val', val)
+                        if(key == 'extraDataText'){
+                            if(instance.extraData[val])
+                                o[key] = instance.extraData[val];
+                            else
+                                o[key] = ''
+                        }else{
+                            o[key] = context.languages[lang][key][val];
+                        }
                         displayData.push(o);
                     }
                 }
@@ -763,7 +772,17 @@ States= ${JSON.stringify(instanceStates)}
                     for (const key in obj) {
                         let val = obj[key];
                         let o = {};
-                        o[key] = context.languages[lang][key][val];
+                        // extradatatext
+                        console.log('key', key)
+                        console.log('val', val)
+                        if(key == 'extraDataText'){
+                            if(instance.extraData[val])
+                                o[key] = instance.extraData[val];
+                            else
+                                o[key] = ''
+                        }else{
+                            o[key] = context.languages[lang][key][val];
+                        }
                         displayData.push(o);
                     }
                 }
@@ -854,7 +873,16 @@ States= ${JSON.stringify(instanceStates)}
                     for (const key in obj) {
                         let val = obj[key];
                         let o = {};
-                        o[key] = context.languages[lang][key][val];
+                        console.log('key', key)
+                        console.log('val', val)
+                        if(key == 'extraDataText'){
+                            if(instance.extraData[val])
+                                o[key] = instance.extraData[val];
+                            else
+                                o[key] = ''
+                        }else{
+                            o[key] = context.languages[lang][key][val];
+                        }
                         displayData.push(o);
                     }
                 }
