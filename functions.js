@@ -8,6 +8,9 @@ let templateID;
 let states;
 //let allDisplayNames;
 
+const sendgrid = require('@sendgrid/mail');
+sendgrid.setApiKey(process.env.SENDGRID_API_KEY || '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');
+
 const axios = require('axios');
 const serverUrl = 'http://localhost:3001';
 
@@ -50,7 +53,7 @@ async function doFunction(func, data, funcData) {
     }else if(func == 'getData'){
 
         response = await runFunction['getData'](instanceID);
-        response = response.extraData;
+        response = response.extraData.formData;
 
         let extraData = {};
         //get the funcdata extra data
@@ -61,9 +64,10 @@ async function doFunction(func, data, funcData) {
         return extraData;
     }else if(func == 'sendEmail'){
         //console.log('DATA IN SENDEMAIL', data)
-        let emails = data.emails;
+        let user = data.user;
         let message = data.message;
-        response = await runFunction['sendEmail'](emails, message)
+        let subject = data.subject;
+        response = await runFunction['sendEmail'](instanceID, user, subject, message)
     }
     // else if(func == 'machineInState'){
     //     let argsArr = args.split(",");
@@ -163,10 +167,9 @@ let runFunction = {
 
         const resp = await runFunction['getData'](instanceID);
         let extra = resp.extraData
-            
         // go through funcData and add all the data values that have key from funcData 
         for (element of funcData) {
-            extra[element] = data[element]
+            extra.formData[element] = data[element]
         }
 
         let res = await axios({
@@ -203,47 +206,57 @@ let runFunction = {
     },
 
     /**
+     * Will get data from the database.
+     * @param {string} instanceID   instance ID
+     * @param {string} user         user to get data from
+     * @returns {Object}     information about the request and requested data
+     */
+    getUserData: async function (instanceID, user) {
+
+        const resp = await axios({
+            method: 'get',
+            url: `${serverUrl}/api/getInstance/${instanceID}`
+        }).then(response =>{
+                return response.data.data.extraData.userData[user];
+            });
+
+        return resp
+    },
+
+    /**
      * Send email
-     * @param   {Array}   emails    list of recipient email addresses
+     * Must send data with email and message, eg:
+        "data": {
+            "user": "seller",
+            "subject": "Thank you",
+            "message": "Hello, Thank you for using our service"
+        }
+     * @param   {Array}   user    recipient email address
      * @param   {string}  message   email message
      * @returns {Object}            information about the request and requested data
      */
-     sendEmail: async function (emails, message) {
+     sendEmail: async function (instanceID, user, subject,message) {
 
-        console.log('emails', emails[0])
-        console.log('meSSAGE', message)
-        let emailMsg = `
+        let userData = await runFunction['getUserData'](instanceID, user);
+        let toEmail = userData.email;
+        try{
+            await sendgrid.send({
+                to: toEmail,
+                from: 'info@crlmosaique.com',
+                subject: subject,
+                text: message,
+            });
+        }catch(err){
+            console.log('EMAIL ERROR: ', err)
+        }
 
-`
-
-        const options = {
-            method: 'POST',
-            url: 'https://rapidprod-sendgrid-v1.p.rapidapi.com/mail/send',
-            headers: {
-            'content-type': 'application/json',
-            'x-rapidapi-key': '8a3062cd37msh8bba38cd45cedcap12feb0jsnf12fecc48bb2',
-            'x-rapidapi-host': 'rapidprod-sendgrid-v1.p.rapidapi.com'
-            },
-            data: {
-            personalizations: [{to: [{email: `${emails[0]}`}], subject: 'Hello, World!'}],
-            from: {email: 'from_address@example.com'},
-            content: [{type: 'text/plain', value: 'Hello, World!'}]
-            }
-        };
-        
-        await axios.request(options).then(function (response) {
-            console.log(response.data);
-        }).catch(function (error) {
-            console.error(error);
-        });
-
-        // const resp = await axios({
-        //     method: 'get',
-        //     url: `${serverUrl}/api/getInstance/${instanceID}`
-        // }).then(response =>{
-        //         return response.data.data;
-        //     });
-        // return resp
+        const resp = await axios({
+            method: 'get',
+            url: `${serverUrl}/api/getInstance/${instanceID}`
+        }).then(response =>{
+                return response.data.data;
+            });
+        return resp
     },
 
     /**
