@@ -31,12 +31,17 @@ function setRoles(tid) {
     //create array to hold all roles from the template
     let arr = [];
     //loop through the roles in the template and push to array
-        for (var r in allTemplates[templateID].roles) {
+    // console.log('template id ', templateID)
+    // console.log('all temps ', allTemplates)
+    for (var r in allTemplates[templateID].roles) {
         if (allTemplates[templateID].roles.hasOwnProperty(r)) {
             arr.push(r);
         }
     }
-    return arr;
+
+    // TODO: add role search
+    // return arr;
+    return ['default-role']
 }
 
 /**
@@ -61,6 +66,13 @@ async function setAllTemplatesDefaults() {
  */
 //function called at startup that sets all defaults of active machines
 function setDefaults(uid, active, stateUID, tid) {  
+    console.log('states ', states)
+    // console.log('active ', active)
+    // console.log('staete uid ', stateUID)
+    console.log('tid ', tid)
+    console.log('uid ', uid)
+    // console.log('template ', template)
+
     // render.setTemplate(tid)
     states[tid][uid] = {};
     //set concurrent true or false in states object
@@ -71,7 +83,7 @@ function setDefaults(uid, active, stateUID, tid) {
     allDisplayNames[tid][dn] = uid;
 
     //if machine is concurrent, current state is set to false
-    if (states[tid][uid].concurrent) {
+    if (states[tid][uid].concurrent == 'true') {
         states[tid][uid].currentState = false;
     //if default state is null, set current state to false
     } else if (template[uid].default == null) {
@@ -119,7 +131,15 @@ function setDefaults(uid, active, stateUID, tid) {
             active = false;
         }
         //if state is composite(machine), call setDefaults function for the state
-        if (template[uid].states[stateUID].composite) {
+        if (template[uid].states[stateUID].composite == 'true') {
+            // console.log(' CALLLING??????????????????????????????? ')
+            // console.log(' why is this being called ', template[uid].states[stateUID])
+            // console.log('states ', states)
+            // console.log('active ', active)
+            // console.log('staete uid ', stateUID)
+            // console.log('tid ', tid)
+            // console.log('uid ', uid)
+            // console.log('template ', template)
             setDefaults(stateMachineUID, active, stateUID, tid);
             //if above conditions are not met, it is not a machine and no further action is needed, move on to next state
         } else {

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 // let address = 'mongodb://127.0.0.1:27017/';
-let address = 'mongodb://volod:cybersecurityisfun@35.203.22.195:27017';
+let address = 'mongodb://volod:cybersecurity2021!@100.25.35.195:27017';
 
 mongoose
     .connect(address, { useNewUrlParser: true })

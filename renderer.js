@@ -19,9 +19,9 @@ const { setAllTemplatesDefaults, setRoles } = require('./startup.js');
 const doFunction = require("./functions.js").doFunction;
 const doTransition = require("./transitions.js").doTransition;
 const doBroadcast = require("./transitions.js").doBroadcast;
-const context = require("./context.js").context;
+const context = {}
 
-const allTemplates = {};
+let allTemplates = {};
 let templateID;
 let template;
 
@@ -31,7 +31,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
 const app = express()
-const apiPort = 3001
+const apiPort = 9001
 
 const db = require("./database/db/db.js")
 const dbRouter = require("./database/routes/router.js")
@@ -58,6 +58,8 @@ function setTemplate(tid) {
     //uses inputted template id and sets it to the global variable templateID
     templateID = tid;
     //sets active template object to the one associated with the templateID
+    // console.log('all temapltes ', allTemplates)
+    console.log(' tempalte id ', templateID)
     template = allTemplates[templateID].machines;
 }
 
@@ -111,9 +113,13 @@ function getMachine(machine, tid) {
  * @param {string} tid     template ID, set to templateID global variable by default
  * @returns {boolean} true if action exists
  */
-function actionExists(action, machine, tid = templateID) {
+function actionExists(action, machine, tid = templateID, role) {
     setTemplate(tid);
     let currState = states[tid][machine].currentState;
+    console.log('curr state ', currState)
+    console.log('role obj ', template[machine].states[currState].role)
+    console.log('role var ', role)
+    console.log('role ', template[machine].states[currState].role[role])
     
     //if action is undefined, it means it does not exists in the current machine
     if (!template[machine].states[currState].role[role].actions[action]) {
@@ -176,8 +182,14 @@ function getCurrState(machine, tid) {
  */
 async function doAction(actionName, machineName, type, role, tid = templateID, data) {
     let promise = new Promise(async (resolve, reject) => {
+        console.log('roile ', role)
+        // role = role
         let response;
         templateID = tid;
+        console.log('all temps ', allTemplates)
+        // console.log('all temps template ', allTemplates[templateID])
+        console.log('temaplte id ', templateID)
+        console.log('machine name ', machineName)
         template = allTemplates[templateID];
         let machine = getMachine(machineName, templateID);
         if (machine == undefined) {
@@ -185,18 +197,18 @@ async function doAction(actionName, machineName, type, role, tid = templateID, d
             return;
         }
 
+        console.log(' 1111')
         //check if action exists
-        if (!actionExists(actionName, machineName)) {
+        if (!actionExists(actionName, machineName, templateID, role = role)) {
             reject(`Action "${actionName}" does not exist in the machine ${machineName}`);
             return;
         }
-
+        console.log(' 222222')
         //check if machine is active, if not return false
         if (states[templateID][machineName].currentState == null) {
             reject("Cannot perform action, machine is not active.");
             return;
         }
-
         let currentState = states[templateID][machineName].currentState;
         let action = machine.states[currentState].role[role].actions[actionName];
         let events = action.action;
@@ -207,11 +219,12 @@ async function doAction(actionName, machineName, type, role, tid = templateID, d
                 return;
             }
         }
+        console.log(' 33333')
 
         //find first action that has condition that is met and execute it's events
         for (const event of events) {
             //if condition is true boolean, do event
-            if (event.condition === true) {
+            if (event.condition == 'true') {
                 response = await doEvents(event.events, machineName, data);
                 resolve(response);
                 return;
@@ -357,6 +370,7 @@ async function createInstance(tid, rid, states) {
         //create instance ID
         let instanceID = Math.floor(Math.random()*9999999);
 
+        // TODO: create instances
         await axios({
             method: 'post',
             url: `${serverUrl}/api/addInstance`,
@@ -387,7 +401,7 @@ async function getInstance(instanceID) {
                 let instance = {
                     templateID: response.templateID,
                     role: response.role,
-                    context: response.context,
+                    // context: response.context,
                     states: JSON.parse(response.states)
                     };
 
@@ -411,7 +425,7 @@ async function updateInstance(instanceID, data) {
             data: {
                 templateID: data.templateID,
                 role: data.role,
-                context: data.context,
+                // context: data.context,
                 states: JSON.stringify(data.states)
             }
         });
@@ -459,7 +473,7 @@ async function start() {
         }
     } while (templateID == -1);
     //ask user to set their role
-    let roles = setRoles(templateID);
+    let roles = await setRoles(templateID);
     let userRole;
     
     while (true) {
@@ -486,14 +500,48 @@ async function start() {
  * Main function.
  */
 async function main() {
+    let url = 'http://localhost:3001'
     // Set up allTemplates object
-    for (const templ of tester.allTemplates) {
-        //create object for state   
-        states[templ.uid] = {};
+
+    // $.get(`${serverURL}/api/getAllData`, function(data, status){
+    //     if(status == 'success'){
+
+    //     }
+    //     console.log('data is ???', data)
+    //   })
+
+    let fetched_templates
+    try{
+        await axios
+            .get(`${url}/api/getAllData`)
+            .then((res)=> { 
+                fetched_templates = res.data.data
+                // context = res.data.context
+                // console.log('all templates ', allTemplates)
+            })
+    }catch(e){
+        console.log('failed to fetch all data ', e);
+    }
+
+    for (let templ of fetched_templates) {
+        // console.log('templ ', templ)
+        // console.log('all temps ', allTemplates[templ])
+        // for some reason one of the templates is empty at the end...
+        // templ = allTemplates[templ]
+        //create object for state
+        states[templ._id] = {};
 
         // Add template to allTemplates
-        allTemplates[templ.uid] = templ;
+        allTemplates[templ._id] = templ.data;
+        console.log(' context ', templ.extraData.context)
+        // add context
+        if(typeof templ.extraData.context == 'string'){
+            templ.extraData.context = JSON.parse(templ.extraData.context)
+        }
+        context[templ._id] = templ.extraData.context
     }
+    console.log('all temps ', allTemplates)
+    console.log('states after main ', states)
 
     //set up all needed global variables and arrays
     await start();
@@ -639,23 +687,35 @@ Called createInstance with:
 template=${tid}
 role=${rid}
 
-States= ${states[tid]}
+States= ${JSON.stringify(states[tid])}
 
 `);
-
+        setTemplate(tid);
+        //call function to set all default states for each template
+        await setAllTemplatesDefaults();
+        setTemplate(tid);
+        if(allTemplates[templateID]){
+            template = allTemplates[templateID];
+        }
+        console.log('states are ', JSON.stringify(states[tid]))
         //create instance and store instance id
         let instanceID = await createInstance(tid, rid, states[tid]);
+        console.log('instance id ', instanceID)
         
         //get current state
         let currentState = states[tid][0].currentState;
         //get display data for current state
-        let display = allTemplates[tid].machines[0].states[currentState].role[rid].display;
+        let display = allTemplates[tid]?.machines[0]?.states[currentState]?.role[rid]?.display;
 
         let displayData = [];
         for (const obj of display.displayData) {
             for (const key in obj) {
                 let val = obj[key];
                 let o = {};
+                // console.log(' tid ', tid)
+                // console.log(' key ', key)
+                // console.log(' val ', val)
+                // console.log(' context ', context)
                 o[key] = context[tid][lang][key][val];
                 displayData.push(o);
             }
@@ -680,8 +740,10 @@ server.use(
         //language
         let lang = req.params.lang;
         
+        console.log('instanceid ', instanceID)
         //get instance
         let instance = await getInstance(instanceID);
+        console.log('instance ', instance)
         //role id
         let rid = instance.role;
         //template id
@@ -702,7 +764,13 @@ action= ${aid}
 States= ${JSON.stringify(instanceStates)}
 
 `);
-
+        // setTemplate(tid);
+        // //call function to set all default states for each template
+        // setAllTemplatesDefaults();
+        // setTemplate(tid);
+        // if(allTemplates[templateID]){
+        //     template = allTemplates[templateID];
+        // }
         try {
             let currentState = states[tid][mid].currentState;
             await doAction(aid, mid, "user", rid, tid);

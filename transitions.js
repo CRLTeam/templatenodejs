@@ -66,6 +66,10 @@ function findCommonAncestor(from, to) {
  * @param machineName name of machine
  */
 async function exitNestedMachines(machineName) {
+    console.log('states ', states)
+    console.log('template id ', templateID)
+    console.log('machine name ', machineName)
+    console.log(' curr state ', states[templateID][machineName])
     let currState = states[templateID][machineName].currentState;
     let state;
     // if exiting concurrent state 
@@ -73,13 +77,13 @@ async function exitNestedMachines(machineName) {
         // exit every concurrent composite state
         for (const concurrState in template[machineName].states) {
             let state = template[machineName].states[concurrState];
-            if(state.composite){
+            if(state.composite == 'true'){
                 let nextMachine = state.machine;
                 await exitNestedMachines(nextMachine);
             }
         }
     // check if current state of machine is not composite(machine)
-    } else if (!template[machineName].states[currState].composite) {
+    } else if (!template[machineName].states[currState].composite == 'true') {
         state = template[machineName].states[currState];
         // if exit actions exist, call each exit action in order
         if (state.exit.length != 0) {
@@ -144,15 +148,15 @@ async function exit(from, stateUid, common) {
     let machineName = from[j];
     let state = template[machineName].states[stateUid];
     //from first machine call function to keep checking for composite machines and exiting them first from the bottom of the hierarchy
-    if (state.composite) {
+    if (state.composite == 'true') {
         let nextMachine = state.machine;
         await exitNestedMachines(nextMachine);
     // check if machine has concurrent states
-    } else if(template[machineName].concurrent){
+    } else if(template[machineName].concurrent == 'true'){
         // exit every concurrent composite state
         for (const concurrState in template[machineName].states) {
             let state = template[machineName].states[concurrState];
-            if(state.composite){
+            if(state.composite == 'true'){
                 let nextMachine = state.machine;
                 await exitNestedMachines(nextMachine);
             }
@@ -201,7 +205,7 @@ async function exit(from, stateUid, common) {
 async function enterNestedMachines(machineName, concurr = false) {
     let machine = states[templateID][machineName];
     //if machine is concurrent, enter each concurrent state/machine
-    if (machine.concurrent) {
+    if (machine.concurrent == 'true') {
         for (let key in template[machineName].states) {
             await enterNestedMachines(template[machineName].states[key].machine, true);
         }
@@ -286,18 +290,20 @@ async function enter(to, stateUid, common) {
             states[templateID][machineName].currentState = stateUid;
         }
         //if enter actions exist, call each enter action in order
-        if (state.entry.length != 0) {
-            for (action of state.entry) {
-                try {
-                    let res = await doAction(action.action, machineName, "entry", role, templateID, action.args);
-                    enterRes.push(res);
-                } catch (e) {
-                    console.log(e);
+        if(state.entry){
+            if (state.entry.length != 0) {
+                for (action of state.entry) {
+                    try {
+                        let res = await doAction(action.action, machineName, "entry", role, templateID, action.args);
+                        enterRes.push(res);
+                    } catch (e) {
+                        console.log(e);
+                    }
                 }
             }
         }
         //if on last machine and it is composite, enter next machine's default state
-        if (state.composite && j == to.length - 1) {
+        if (state.composite == 'true' && j == to.length - 1) {
             nextMachine = state.machine;
             await enterNestedMachines(nextMachine);
         }
@@ -341,10 +347,10 @@ async function doTransition(machineName, transitionName) {
     return {
         status: "success",
         type: "transition",
-        message: `Transition from '${transition["from"]}' to '${transition["to"]}' complete`,
+        message: `Transition from '${JSON.stringify(transition["from"])}' to '${JSON.stringify(transition["to"])}' complete`,
         data: {
-            transitionFrom: transition["from"],
-            transitionTo: transition["to"],
+            transitionFrom: JSON.stringify(transition["from"]),
+            transitionTo: JSON.stringify(transition["to"]),
             exits: exitResponse,
             enters: enterResponse,
         }
