@@ -197,13 +197,13 @@ async function doAction(actionName, machineName, type, role, tid = templateID, d
             return;
         }
 
-        console.log(' 1111')
+        // console.log(' 1111')
         //check if action exists
         if (!actionExists(actionName, machineName, templateID, role = role)) {
             reject(`Action "${actionName}" does not exist in the machine ${machineName}`);
             return;
         }
-        console.log(' 222222')
+        // console.log(' 222222')
         //check if machine is active, if not return false
         if (states[templateID][machineName].currentState == null) {
             reject("Cannot perform action, machine is not active.");
@@ -219,7 +219,7 @@ async function doAction(actionName, machineName, type, role, tid = templateID, d
                 return;
             }
         }
-        console.log(' 33333')
+        // console.log(' 33333')
 
         //find first action that has condition that is met and execute it's events
         for (const event of events) {
@@ -379,7 +379,8 @@ async function createInstance(tid, rid, states) {
                 templateID: tid,
                 role: rid,
                 context: tid,
-                states: JSON.stringify(states)
+                states: JSON.stringify(states),
+                data: '{}'
             }
         });
 
@@ -723,7 +724,7 @@ States= ${JSON.stringify(states[tid])}
 
         console.log("Display=", displayData)
 
-        return res.json({status: "success", currentState: currentState, displayObject: displayData, instanceID: instanceID});
+        return res.json({status: "success", currentState: currentState, displayObject: displayData, instanceID: instanceID, states:states[tid]});
     })
 );
 
