@@ -224,7 +224,7 @@ async function doAction(actionName, machineName, type, role, tid = templateID, d
         //find first action that has condition that is met and execute it's events
         for (const event of events) {
             //if condition is true boolean, do event
-            if (event.condition == 'true') {
+            if (event.condition == 'true' || event.condition == true) {
                 response = await doEvents(event.events, machineName, data);
                 resolve(response);
                 return;
